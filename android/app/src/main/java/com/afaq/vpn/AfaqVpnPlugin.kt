@@ -99,6 +99,7 @@ class AfaqVpnPlugin : Plugin() {
 
         result.put("isRegistered", isRegistered)
         result.put("hasIdentity", hasIdentity)
+        result.put("legacyFallbackEnabled", BuildConfig.ENABLE_LEGACY_DEBUG_FALLBACK)
 
         if (isRegistered) {
             val address = AfaqSecureStorage.getString(context, "wg_address") ?: ""

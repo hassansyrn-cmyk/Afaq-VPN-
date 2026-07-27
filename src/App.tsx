@@ -123,6 +123,7 @@ export default function App() {
 
   // New states for device provisioning
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
+  const [legacyFallbackEnabled, setLegacyFallbackEnabled] = useState<boolean>(false);
   const [provisionState, setProvisionState] = useState<'idle' | 'preparing' | 'registered' | 'failed' | 'incomplete'>('idle');
   const [provisionError, setProvisionError] = useState<string>('');
 
@@ -176,6 +177,7 @@ export default function App() {
     AfaqVpn.getProvisioningStatus()
       .then((status) => {
         setIsRegistered(status.isRegistered);
+        setLegacyFallbackEnabled(status.legacyFallbackEnabled || false);
         if (status.isRegistered) {
           setProvisionState('registered');
         } else {
@@ -278,7 +280,7 @@ export default function App() {
     }
 
     // In production, isRegistered must be true.
-    if (!isRegistered) {
+    if (!isRegistered && !legacyFallbackEnabled) {
       setError(t.incompleteCredentialsError);
       setState('error');
       return;
@@ -382,7 +384,7 @@ export default function App() {
             <button
               className={`connect ${state}`}
               onClick={toggle}
-              disabled={state === 'connecting' || state === 'disconnecting' || (!isRegistered && isNativeAndroid())}
+              disabled={state === 'connecting' || state === 'disconnecting' || (!isRegistered && !legacyFallbackEnabled && isNativeAndroid())}
             >
               <Shield />
               <strong>{state === 'connected' ? t.disconnect : t.connect}</strong>

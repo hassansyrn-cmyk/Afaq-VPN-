@@ -10,8 +10,8 @@ import com.google.android.play.core.integrity.StandardIntegrityManager.StandardI
 import java.security.MessageDigest
 
 object AfaqIntegrityConfig {
-    // PLACEHOLDERS - To be configured with real values when available from Google Cloud / Play Console
-    const val GOOGLE_CLOUD_PROJECT_NUMBER: Long = 0L // Placeholder
+    // Confirmed production Google Cloud project number linked with Play Console
+    const val GOOGLE_CLOUD_PROJECT_NUMBER: Long = 12432926218L
 }
 
 class AfaqIntegrityManager(private val context: Context) {
