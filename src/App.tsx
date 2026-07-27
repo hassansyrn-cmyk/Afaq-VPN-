@@ -126,8 +126,19 @@ export default function App() {
   const [legacyFallbackEnabled, setLegacyFallbackEnabled] = useState<boolean>(false);
   const [provisionState, setProvisionState] = useState<'idle' | 'preparing' | 'registered' | 'failed' | 'incomplete'>('idle');
   const [provisionError, setProvisionError] = useState<string>('');
+  const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
+  const [isProvisioning, setIsProvisioning] = useState<boolean>(false);
 
   const cfg = useMemo(envConfig, []);
+
+  // Cooldown countdown timer
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const id = setInterval(() => {
+      setCooldownSeconds((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [cooldownSeconds]);
 
   useEffect(() => {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -148,7 +159,8 @@ export default function App() {
   }, [state, started]);
 
   const handleProvision = async () => {
-    if (!isNativeAndroid()) return;
+    if (!isNativeAndroid() || isProvisioning || cooldownSeconds > 0) return;
+    setIsProvisioning(true);
     setProvisionState('preparing');
     setProvisionError('');
     try {
@@ -157,17 +169,27 @@ export default function App() {
         setProvisionState('registered');
         setIsRegistered(true);
       } else {
+        if (res.retryAfterSeconds && res.retryAfterSeconds > 0) {
+          setCooldownSeconds(res.retryAfterSeconds);
+        } else {
+          setCooldownSeconds(5); // Default short local cooldown
+        }
+
         if (res.isRecoverableError) {
           setProvisionState('incomplete');
           setProvisionError(t.incompleteCredentialsError);
         } else {
           setProvisionState('failed');
-          setProvisionError(res.error || t.registrationFailed);
+          const errorMsg = res.error === 'TOO_MANY_REQUESTS' ? t.tooManyRequests : (res.error || t.registrationFailed);
+          setProvisionError(errorMsg);
         }
       }
     } catch (err) {
+      setCooldownSeconds(5); // Default cooldown on failure
       setProvisionState('failed');
       setProvisionError(String(err));
+    } finally {
+      setIsProvisioning(false);
     }
   };
 
@@ -415,9 +437,10 @@ export default function App() {
                     <button
                       onClick={handleProvision}
                       className="secondary"
+                      disabled={isProvisioning || cooldownSeconds > 0}
                       style={{ padding: '4px 12px', fontSize: '12px', margin: '4px auto', display: 'block', minHeight: '32px' }}
                     >
-                      {t.retry}
+                      {cooldownSeconds > 0 ? `${t.retry} (${cooldownSeconds}s)` : t.retry}
                     </button>
                   </div>
                 )}
@@ -429,9 +452,10 @@ export default function App() {
                     <button
                       onClick={handleProvision}
                       className="secondary"
+                      disabled={isProvisioning || cooldownSeconds > 0}
                       style={{ padding: '4px 12px', fontSize: '12px', margin: '4px auto', display: 'block', minHeight: '32px' }}
                     >
-                      {t.retry}
+                      {cooldownSeconds > 0 ? `${t.retry} (${cooldownSeconds}s)` : t.retry}
                     </button>
                   </div>
                 )}

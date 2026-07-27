@@ -19,6 +19,8 @@ import com.getcapacitor.annotation.CapacitorPlugin
 @CapacitorPlugin(name = "AfaqVpn")
 class AfaqVpnPlugin : Plugin() {
 
+    private val isProvisioningInProgress = java.util.concurrent.atomic.AtomicBoolean(false)
+
     private val stateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action != AfaqVpnService.ACTION_STATE) {
@@ -112,6 +114,16 @@ class AfaqVpnPlugin : Plugin() {
 
     @PluginMethod
     fun provisionDevice(call: PluginCall) {
+        if (!isProvisioningInProgress.compareAndSet(false, true)) {
+            val res = JSObject()
+            res.put("state", "failed")
+            res.put("error", "Provisioning is already in progress.")
+            res.put("isRecoverableError", false)
+            res.put("retryAfterSeconds", 0)
+            call.resolve(res)
+            return
+        }
+
         val deviceId = AfaqIdentityManager.getOrCreateInstallationId(context)
         val keyPair = AfaqIdentityManager.getOrCreateWireGuardKeyPair(context)
         val publicKey = keyPair.second
@@ -121,6 +133,7 @@ class AfaqVpnPlugin : Plugin() {
         val projectNumber = AfaqIntegrityConfig.GOOGLE_CLOUD_PROJECT_NUMBER
 
         if (!isDebug && projectNumber == 0L) {
+            isProvisioningInProgress.set(false)
             call.reject("Real Google Cloud Project Number is not configured. Play Integrity is required in production release builds.")
             return
         }
@@ -134,17 +147,20 @@ class AfaqVpnPlugin : Plugin() {
                 null,
                 object : AfaqRegisterClient.RegisterCallback {
                     override fun onSuccess(existing: Boolean) {
+                        isProvisioningInProgress.set(false)
                         val res = JSObject()
                         res.put("state", "registered")
                         res.put("existing", existing)
                         call.resolve(res)
                     }
 
-                    override fun onFailure(errorMessage: String, isRecoverableError: Boolean) {
+                    override fun onFailure(errorMessage: String, isRecoverableError: Boolean, retryAfterSeconds: Int) {
+                        isProvisioningInProgress.set(false)
                         val res = JSObject()
                         res.put("state", "failed")
                         res.put("error", errorMessage)
                         res.put("isRecoverableError", isRecoverableError)
+                        res.put("retryAfterSeconds", retryAfterSeconds)
                         call.resolve(res)
                     }
                 }
@@ -160,17 +176,20 @@ class AfaqVpnPlugin : Plugin() {
                         token,
                         object : AfaqRegisterClient.RegisterCallback {
                             override fun onSuccess(existing: Boolean) {
+                                isProvisioningInProgress.set(false)
                                 val res = JSObject()
                                 res.put("state", "registered")
                                 res.put("existing", existing)
                                 call.resolve(res)
                             }
 
-                            override fun onFailure(errorMessage: String, isRecoverableError: Boolean) {
+                            override fun onFailure(errorMessage: String, isRecoverableError: Boolean, retryAfterSeconds: Int) {
+                                isProvisioningInProgress.set(false)
                                 val res = JSObject()
                                 res.put("state", "failed")
                                 res.put("error", errorMessage)
                                 res.put("isRecoverableError", isRecoverableError)
+                                res.put("retryAfterSeconds", retryAfterSeconds)
                                 call.resolve(res)
                             }
                         }
@@ -178,10 +197,12 @@ class AfaqVpnPlugin : Plugin() {
                 }
 
                 override fun onFailure(error: Exception) {
+                    isProvisioningInProgress.set(false)
                     val res = JSObject()
                     res.put("state", "failed")
                     res.put("error", "Play Integrity failed: ${error.message}")
                     res.put("isRecoverableError", false)
+                    res.put("retryAfterSeconds", 5)
                     call.resolve(res)
                 }
             })

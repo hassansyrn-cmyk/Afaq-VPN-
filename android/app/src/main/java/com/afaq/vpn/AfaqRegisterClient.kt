@@ -14,7 +14,7 @@ object AfaqRegisterClient {
 
     interface RegisterCallback {
         fun onSuccess(existing: Boolean)
-        fun onFailure(errorMessage: String, isRecoverableError: Boolean)
+        fun onFailure(errorMessage: String, isRecoverableError: Boolean, retryAfterSeconds: Int)
     }
 
     fun register(
@@ -77,14 +77,15 @@ object AfaqRegisterClient {
                             // Local credentials are lost and server didn't send a preshared key
                             callback.onFailure(
                                 "Secure credentials are incomplete. Please register this device again.",
-                                isRecoverableError = true
+                                true,
+                                0
                             )
                             return@Thread
                         }
                     }
 
                     if (address.isBlank() || dns.isBlank() || serverPublicKey.isBlank() || endpoint.isBlank() || allowedIps.isBlank()) {
-                        callback.onFailure("Incomplete WireGuard configuration from server.", false)
+                        callback.onFailure("Incomplete WireGuard configuration from server.", false, 0)
                         return@Thread
                     }
 
@@ -99,13 +100,16 @@ object AfaqRegisterClient {
                     AfaqSecureStorage.saveBoolean(context, "is_registered", true)
 
                     callback.onSuccess(existing)
+                } else if (responseCode == 429) {
+                    val retryAfterHeader = conn.getHeaderField("Retry-After")
+                    val retryAfterSeconds = retryAfterHeader?.toIntOrNull() ?: 10 // Short local cooldown default
+                    callback.onFailure("TOO_MANY_REQUESTS", false, retryAfterSeconds)
                 } else {
-                    val errorReader = conn.errorStream?.let { InputStreamReader(it, Charsets.UTF_8) }
-                    val errorMsg = errorReader?.let { BufferedReader(it).use { b -> b.readText() } } ?: ""
-                    callback.onFailure("Registration failed with status $responseCode: $errorMsg", false)
+                    // Do not leak raw HTML, stack traces, or response bodies. Return a clean user-friendly status message.
+                    callback.onFailure("Registration failed with status $responseCode.", false, 5)
                 }
             } catch (e: Exception) {
-                callback.onFailure("Network or parsing error: ${e.message}", false)
+                callback.onFailure("Network error. Please check your connection and try again.", false, 5)
             }
         }.start()
     }

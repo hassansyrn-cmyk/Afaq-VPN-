@@ -4,5 +4,6 @@ export default { app:'آفاق VPN', home:'الرئيسية', servers:'الخو�
   deviceRegistered: 'تم تسجيل الجهاز',
   registrationFailed: 'فشل تسجيل الجهاز',
   retry: 'إعادة المحاولة',
-  incompleteCredentialsError: 'بيانات الاتصال الآمن غير مكتملة. يرجى تسجيل هذا الجهاز مجددًا.'
+  incompleteCredentialsError: 'بيانات الاتصال الآمن غير مكتملة. يرجى تسجيل هذا الجهاز مجددًا.',
+  tooManyRequests: 'محاولات تسجيل كثيرة. يرجى المحاولة لاحقًا.'
 };
