@@ -215,6 +215,7 @@ class AfaqVpnPlugin : Plugin() {
 
     @PluginMethod
     fun getTrafficStats(call: PluginCall) {
+        AfaqVpnService.instance?.updateTrafficStats()
         val result = JSObject()
         result.put(
             "receivedBytes",
