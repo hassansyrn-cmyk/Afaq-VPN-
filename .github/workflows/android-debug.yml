@@ -15,6 +15,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    env:
+      VITE_WG_CLIENT_ADDRESS: ${{ secrets.WG_CLIENT_ADDRESS }}
+      VITE_WG_CLIENT_PRIVATE_KEY: ${{ secrets.WG_CLIENT_PRIVATE_KEY }}
+      VITE_WG_ENDPOINT: ${{ secrets.WG_ENDPOINT }}
+      VITE_WG_PRESHARED_KEY: ${{ secrets.WG_PRESHARED_KEY }}
+      VITE_WG_SERVER_PUBLIC_KEY: ${{ secrets.WG_SERVER_PUBLIC_KEY }}
+
+      WG_CLIENT_ADDRESS: ${{ secrets.WG_CLIENT_ADDRESS }}
+      WG_CLIENT_PRIVATE_KEY: ${{ secrets.WG_CLIENT_PRIVATE_KEY }}
+      WG_ENDPOINT: ${{ secrets.WG_ENDPOINT }}
+      WG_PRESHARED_KEY: ${{ secrets.WG_PRESHARED_KEY }}
+      WG_SERVER_PUBLIC_KEY: ${{ secrets.WG_SERVER_PUBLIC_KEY }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,6 +44,36 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: gradle
+
+      - name: Verify WireGuard configuration
+        shell: bash
+        run: |
+          if [ -z "$VITE_WG_CLIENT_ADDRESS" ]; then
+            echo "Missing secret: WG_CLIENT_ADDRESS"
+            exit 1
+          fi
+
+          if [ -z "$VITE_WG_CLIENT_PRIVATE_KEY" ]; then
+            echo "Missing secret: WG_CLIENT_PRIVATE_KEY"
+            exit 1
+          fi
+
+          if [ -z "$VITE_WG_ENDPOINT" ]; then
+            echo "Missing secret: WG_ENDPOINT"
+            exit 1
+          fi
+
+          if [ -z "$VITE_WG_PRESHARED_KEY" ]; then
+            echo "Missing secret: WG_PRESHARED_KEY"
+            exit 1
+          fi
+
+          if [ -z "$VITE_WG_SERVER_PUBLIC_KEY" ]; then
+            echo "Missing secret: WG_SERVER_PUBLIC_KEY"
+            exit 1
+          fi
+
+          echo "All WireGuard secrets are available."
 
       - name: Install npm dependencies
         run: npm ci
