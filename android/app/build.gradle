@@ -4,6 +4,13 @@ apply plugin: 'org.jetbrains.kotlin.android'
 android {
     namespace = "com.afaq.vpn"
     compileSdk = rootProject.ext.compileSdkVersion
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    def legacyFallback = project.hasProperty('AFAQ_ENABLE_LEGACY_DEBUG_FALLBACK') ? project.property('AFAQ_ENABLE_LEGACY_DEBUG_FALLBACK').toBoolean() : false
+
     defaultConfig {
         applicationId "com.afaq.vpn"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -16,6 +23,7 @@ android {
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
+        buildConfigField "boolean", "ENABLE_LEGACY_DEBUG_FALLBACK", "${legacyFallback}"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -31,6 +39,41 @@ android {
     }
 }
 
+task checkReleaseSecurity {
+    doLast {
+        def legacyFallback = project.hasProperty('AFAQ_ENABLE_LEGACY_DEBUG_FALLBACK') ? project.property('AFAQ_ENABLE_LEGACY_DEBUG_FALLBACK').toBoolean() : false
+        if (legacyFallback) {
+            throw new GradleException("Security violation: AFAQ_ENABLE_LEGACY_DEBUG_FALLBACK is enabled.")
+        }
+
+        def manifestFile = file('src/main/AndroidManifest.xml')
+        if (manifestFile.exists()) {
+            def manifestText = manifestFile.text
+            if (manifestText.contains('usesCleartextTraffic="true"')) {
+                throw new GradleException("Security violation: usesCleartextTraffic is set to true in AndroidManifest.xml.")
+            }
+        }
+
+        def webAssetsDir = file('src/main/assets/public')
+        if (webAssetsDir.exists()) {
+            webAssetsDir.eachFileRecurse { f ->
+                if (f.isFile() && f.name.endsWith('.js')) {
+                    def content = f.text
+                    if (content.contains("AFAQ_API_TOKEN")) {
+                        throw new GradleException("Security violation: Static backend API token found in web assets!")
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.configureEach { task ->
+    if (task.name.startsWith("assembleRelease") || task.name.startsWith("bundleRelease")) {
+        task.dependsOn(checkReleaseSecurity)
+    }
+}
+
 repositories {
     flatDir{
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
@@ -39,6 +82,7 @@ repositories {
 
 dependencies {
     implementation "com.wireguard.android:tunnel:1.0.20260102"
+    implementation "com.google.android.play:integrity:1.4.0"
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.5"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"

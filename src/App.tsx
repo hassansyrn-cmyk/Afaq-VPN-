@@ -121,6 +121,11 @@ export default function App() {
   const [afterIp, setAfterIp] = useState('');
   const [pingVal, setPingVal] = useState<number | null>(null);
 
+  // New states for device provisioning
+  const [isRegistered, setIsRegistered] = useState<boolean>(false);
+  const [provisionState, setProvisionState] = useState<'idle' | 'preparing' | 'registered' | 'failed' | 'incomplete'>('idle');
+  const [provisionError, setProvisionError] = useState<string>('');
+
   const cfg = useMemo(envConfig, []);
 
   useEffect(() => {
@@ -140,6 +145,45 @@ export default function App() {
     }, 1000);
     return () => clearInterval(id);
   }, [state, started]);
+
+  const handleProvision = async () => {
+    if (!isNativeAndroid()) return;
+    setProvisionState('preparing');
+    setProvisionError('');
+    try {
+      const res = await AfaqVpn.provisionDevice();
+      if (res.state === 'registered') {
+        setProvisionState('registered');
+        setIsRegistered(true);
+      } else {
+        if (res.isRecoverableError) {
+          setProvisionState('incomplete');
+          setProvisionError(t.incompleteCredentialsError);
+        } else {
+          setProvisionState('failed');
+          setProvisionError(res.error || t.registrationFailed);
+        }
+      }
+    } catch (err) {
+      setProvisionState('failed');
+      setProvisionError(String(err));
+    }
+  };
+
+  // Check provisioning status & start initial provisioning if not registered
+  useEffect(() => {
+    if (!isNativeAndroid()) return;
+    AfaqVpn.getProvisioningStatus()
+      .then((status) => {
+        setIsRegistered(status.isRegistered);
+        if (status.isRegistered) {
+          setProvisionState('registered');
+        } else {
+          handleProvision();
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Connection status & status changed listeners
   useEffect(() => {
@@ -232,11 +276,14 @@ export default function App() {
       }
       return;
     }
-    if (!configReady(cfg)) {
-      setError(t.unavailable);
+
+    // In production, isRegistered must be true.
+    if (!isRegistered) {
+      setError(t.incompleteCredentialsError);
       setState('error');
       return;
     }
+
     setState('connecting');
     setTraffic({ receivedBytes: 0, transmittedBytes: 0 });
     try {
@@ -245,6 +292,7 @@ export default function App() {
         setState('disconnected');
         return;
       }
+      // Connect without passing hardcoded config (or legacy fallback in debug if permitted natively)
       await AfaqVpn.connect({ config: cfg });
     } catch (e) {
       setError(String(e));
@@ -330,15 +378,64 @@ export default function App() {
               <span />
               {state === 'connected' ? t.protected : t.unprotected}
             </section>
+
             <button
               className={`connect ${state}`}
               onClick={toggle}
-              disabled={state === 'connecting' || state === 'disconnecting'}
+              disabled={state === 'connecting' || state === 'disconnecting' || (!isRegistered && isNativeAndroid())}
             >
               <Shield />
               <strong>{state === 'connected' ? t.disconnect : t.connect}</strong>
               <small>{status}</small>
             </button>
+
+            {/* Device provisioning state display near the Connect button */}
+            {isNativeAndroid() && (
+              <div className="provisioning-status" style={{ textAlign: 'center', marginTop: '12px', marginBottom: '12px' }}>
+                {provisionState === 'preparing' && (
+                  <p style={{ color: '#0070f3', fontSize: '14px', margin: '4px 0' }}>
+                    {t.preparingSecureConnection}...
+                  </p>
+                )}
+                {provisionState === 'registered' && (
+                  <p style={{ color: '#00cc88', fontSize: '14px', margin: '4px 0' }}>
+                    ✓ {t.deviceRegistered}
+                  </p>
+                )}
+                {provisionState === 'failed' && (
+                  <div>
+                    <p style={{ color: '#ff0055', fontSize: '14px', margin: '4px 0' }}>
+                      {t.registrationFailed}
+                    </p>
+                    {provisionError && (
+                      <p style={{ fontSize: '12px', color: '#888', margin: '2px 0 8px 0' }}>{provisionError}</p>
+                    )}
+                    <button
+                      onClick={handleProvision}
+                      className="secondary"
+                      style={{ padding: '4px 12px', fontSize: '12px', margin: '4px auto', display: 'block', minHeight: '32px' }}
+                    >
+                      {t.retry}
+                    </button>
+                  </div>
+                )}
+                {provisionState === 'incomplete' && (
+                  <div>
+                    <p style={{ color: '#ff0055', fontSize: '14px', margin: '4px 0' }}>
+                      {t.incompleteCredentialsError}
+                    </p>
+                    <button
+                      onClick={handleProvision}
+                      className="secondary"
+                      style={{ padding: '4px 12px', fontSize: '12px', margin: '4px auto', display: 'block', minHeight: '32px' }}
+                    >
+                      {t.retry}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {error && <div className="error">{error}</div>}
             <section className="serverCard">
               <div>
