@@ -202,7 +202,7 @@ class AfaqVpnPlugin : Plugin() {
                     res.put("state", "failed")
                     res.put("error", "Play Integrity failed: ${error.message}")
                     res.put("isRecoverableError", false)
-                    res.put("retryAfterSeconds", 5)
+                    res.put("retryAfterSeconds", 10)
                     call.resolve(res)
                 }
             })

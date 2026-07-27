@@ -106,10 +106,10 @@ object AfaqRegisterClient {
                     callback.onFailure("TOO_MANY_REQUESTS", false, retryAfterSeconds)
                 } else {
                     // Do not leak raw HTML, stack traces, or response bodies. Return a clean user-friendly status message.
-                    callback.onFailure("Registration failed with status $responseCode.", false, 5)
+                    callback.onFailure("Registration failed with status $responseCode.", false, 10)
                 }
             } catch (e: Exception) {
-                callback.onFailure("Network error. Please check your connection and try again.", false, 5)
+                callback.onFailure("Network error. Please check your connection and try again.", false, 10)
             }
         }.start()
     }

@@ -28,6 +28,31 @@ The backend must verify the integrity tokens retrieved by the client against Goo
 
 ---
 
+## 1.1 Server-Side Capacity, Concurrency, and Rate Limits
+
+To configure the registration system for the highest practical user capacity while preserving abuse protection, the backend must implement the following rules:
+
+1. **Client Capacity Limit:**
+   - Keep `MAX_ACTIVE_CLIENTS = 245` because the current WireGuard network is `10.66.66.0/24`.
+2. **Global Protection Rate-Limit:**
+   - Apply a limit of **300 requests per minute** per public IP.
+3. **New Registration Quotas:**
+   - **20 new registration attempts per device_id per hour** maximum.
+   - **20 new registration attempts per WireGuard public_key per hour** maximum.
+   - *Note:* Successfully registered devices must **not** consume this strict new-registration quota when retrieving their existing status.
+4. **IP Limits Removed:**
+   - **The old blanket 3-per-hour IP limit must be removed completely** to avoid blocking multiple legitimate users behind the same mobile carrier or shared public IP.
+5. **No IP-Based Primary Identity:**
+   - Do **not** use the client's public IP address as the primary registration identity. The locally generated, persistent `device_id` must be used as the primary identity.
+6. **Concurrent IP Allocation:**
+   - The backend must prevent duplicate IP allocation under concurrent registrations by using atomic transactions or locking around the IP address pool allocations.
+7. **Play Integrity Early Verification:**
+   - Verify the Google Play Integrity token **before** creating any database record or WireGuard peer. Invalid, replayed, or mismatched integrity tokens must never create peers.
+8. **Concurrency Control:**
+   - Restrict registrations to maximum **one concurrent provisioning request per device_id** at a time.
+
+---
+
 ## 2. Keyless / Federated Backend Authentication Contract
 
 Since the Google Cloud Organization blocks the creation of long-lived, static, downloadable service-account JSON keys (`iam.disableServiceAccountKeyCreation` policy), the backend must authenticate **keylessly** using Google Application Default Credentials (ADC) or Federated Identity.

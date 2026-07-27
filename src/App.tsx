@@ -172,7 +172,7 @@ export default function App() {
         if (res.retryAfterSeconds && res.retryAfterSeconds > 0) {
           setCooldownSeconds(res.retryAfterSeconds);
         } else {
-          setCooldownSeconds(5); // Default short local cooldown
+          setCooldownSeconds(10); // Default local cooldown for network or temporary failures
         }
 
         if (res.isRecoverableError) {
@@ -185,7 +185,7 @@ export default function App() {
         }
       }
     } catch (err) {
-      setCooldownSeconds(5); // Default cooldown on failure
+      setCooldownSeconds(10); // Default cooldown on failure
       setProvisionState('failed');
       setProvisionError(String(err));
     } finally {
