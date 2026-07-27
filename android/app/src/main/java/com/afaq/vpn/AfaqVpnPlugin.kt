@@ -9,7 +9,7 @@ import android.net.VpnService
 import android.provider.Settings
 import androidx.activity.result.ActivityResult
 import androidx.core.content.ContextCompat
-import com.getcapacitor.ActivityCallback
+import com.getcapacitor.annotation.ActivityCallback
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
