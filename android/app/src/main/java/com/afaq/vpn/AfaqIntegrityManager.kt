@@ -11,7 +11,7 @@ import java.security.MessageDigest
 
 object AfaqIntegrityConfig {
     // Confirmed production Google Cloud project number linked with Play Console
-    const val GOOGLE_CLOUD_PROJECT_NUMBER: Long = 12432926218L
+    const val GOOGLE_CLOUD_PROJECT_NUMBER: Long = 424448517557L
 }
 
 class AfaqIntegrityManager(private val context: Context) {

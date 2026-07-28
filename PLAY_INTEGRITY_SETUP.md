@@ -7,8 +7,8 @@ This document provides setup instructions for the Google Play Integrity API inte
 The application is linked with Google Play Console and Google Cloud with the following verified parameters:
 
 * **Android Application ID:** `com.afaq.vpn`
-* **Google Cloud Project Number:** `12432926218`
-* **Standard Integrity Token Provider:** Triggered with project number `12432926218` over SHA-256 canonical request hash.
+* **Google Cloud Project Number:** `424448517557`
+* **Standard Integrity Token Provider:** Triggered with project number `424448517557` over SHA-256 canonical request hash.
 
 ### Standard Play Integrity Verdict Policy
 The backend must verify the integrity tokens retrieved by the client against Google's Play Integrity servers and validate the following responses:
@@ -70,7 +70,7 @@ Since the Google Cloud Organization blocks the creation of long-lived, static, d
 We utilize **Workload Identity Federation (WIF)** to exchange external tokens for temporary Google OAuth 2.0 credentials keylessly.
 
 1. **Create Workload Identity Pool and Provider:**
-   - In Google Cloud Project `12432926218`, create a Workload Identity Pool (e.g. `backend-pool`).
+   - In Google Cloud Project `424448517557`, create a Workload Identity Pool (e.g. `backend-pool`).
    - Add a Workload Identity Provider mapping to your external hosting environment (e.g., AWS IAM OIDC, OpenID Connect, or GitHub Actions).
 2. **Grant Impersonation Permission:**
    - Allow the external workload identity principal to impersonate your target Google Service Account (`play-integrity-verifier@afaq-vpn.iam.gserviceaccount.com`) by granting it the **Service Account Token Creator** (`roles/iam.serviceAccountTokenCreator`) role.
