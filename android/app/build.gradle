@@ -33,10 +33,11 @@ android {
     kotlinOptions { jvmTarget = '21' }
     signingConfigs {
         release {
-            storeFile file("release.keystore")
-            storePassword "afaqvpn"
-            keyAlias "afaq"
-            keyPassword "afaqvpn"
+            def keystoreFile = System.getenv("SIGNING_STORE_FILE") ? file(System.getenv("SIGNING_STORE_FILE")) : file("release.keystore")
+            storeFile keystoreFile
+            storePassword System.getenv("SIGNING_STORE_PASSWORD") ?: ""
+            keyAlias System.getenv("SIGNING_KEY_ALIAS") ?: "afaq"
+            keyPassword System.getenv("SIGNING_KEY_PASSWORD") ?: ""
         }
     }
     buildTypes {
