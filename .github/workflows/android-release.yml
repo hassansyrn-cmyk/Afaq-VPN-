@@ -31,6 +31,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate Signing Secrets
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          if [ -z "$SIGNING_KEYSTORE_BASE64" ]; then
+            echo "Error: SIGNING_KEYSTORE_BASE64 is missing or empty."
+            exit 1
+          fi
+          if [ -z "$SIGNING_STORE_PASSWORD" ]; then
+            echo "Error: SIGNING_STORE_PASSWORD is missing or empty."
+            exit 1
+          fi
+          if [ -z "$SIGNING_KEY_ALIAS" ]; then
+            echo "Error: SIGNING_KEY_ALIAS is missing or empty."
+            exit 1
+          fi
+          if [ -z "$SIGNING_KEY_PASSWORD" ]; then
+            echo "Error: SIGNING_KEY_PASSWORD is missing or empty."
+            exit 1
+          fi
+          echo "All signing secrets are configured successfully."
+
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
@@ -63,9 +88,7 @@ jobs:
         env:
           SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
         run: |
-          if [ ! -z "$SIGNING_KEYSTORE_BASE64" ]; then
-            echo "$SIGNING_KEYSTORE_BASE64" | base64 --decode > android/app/release.keystore
-          fi
+          echo "$SIGNING_KEYSTORE_BASE64" | base64 --decode > android/app/release.keystore
 
       - name: Build Signed Release AAB
         working-directory: android
