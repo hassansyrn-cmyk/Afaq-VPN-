@@ -130,12 +130,23 @@ export default function App() {
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const [legacyFallbackEnabled, setLegacyFallbackEnabled] = useState<boolean>(false);
   const [hasValidConfig, setHasValidConfig] = useState<boolean>(false);
+  const [hasUsableSavedConfig, setHasUsableSavedConfig] = useState<boolean>(false);
   const [provisionState, setProvisionState] = useState<'idle' | 'preparing' | 'registered' | 'failed' | 'incomplete'>('idle');
   const [provisionError, setProvisionError] = useState<string>('');
   const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
   const [isProvisioning, setIsProvisioning] = useState<boolean>(false);
 
   const cfg = useMemo(envConfig, []);
+
+  const refreshConfigStatus = async () => {
+    if (!isNativeAndroid()) return;
+    try {
+      const status = await AfaqVpn.getConfigStatus();
+      setHasUsableSavedConfig(status.valid);
+    } catch (_) {
+      setHasUsableSavedConfig(false);
+    }
+  };
 
   // Cooldown countdown timer
   useEffect(() => {
@@ -175,6 +186,7 @@ export default function App() {
         setProvisionState('registered');
         setIsRegistered(true);
         setHasValidConfig(true);
+        await refreshConfigStatus();
       } else {
         if (res.retryAfterSeconds && res.retryAfterSeconds > 0) {
           setCooldownSeconds(res.retryAfterSeconds);
@@ -203,18 +215,20 @@ export default function App() {
   // Check provisioning status & start initial provisioning if not registered
   useEffect(() => {
     if (!isNativeAndroid()) return;
-    AfaqVpn.getProvisioningStatus()
-      .then((status) => {
-        setIsRegistered(status.isRegistered);
-        setLegacyFallbackEnabled(status.legacyFallbackEnabled || false);
-        setHasValidConfig(status.hasValidConfig || false);
-        if (status.isRegistered) {
-          setProvisionState('registered');
-        } else {
-          handleProvision();
-        }
-      })
-      .catch(() => {});
+    refreshConfigStatus().then(() => {
+      AfaqVpn.getProvisioningStatus()
+        .then((status) => {
+          setIsRegistered(status.isRegistered);
+          setLegacyFallbackEnabled(status.legacyFallbackEnabled || false);
+          setHasValidConfig(status.hasValidConfig || false);
+          if (status.isRegistered) {
+            setProvisionState('registered');
+          } else {
+            handleProvision();
+          }
+        })
+        .catch(() => {});
+    });
   }, []);
 
   // Connection status & status changed listeners
@@ -341,8 +355,8 @@ export default function App() {
       return;
     }
 
-    // In production, hasValidConfig must be true.
-    if (!hasValidConfig && !legacyFallbackEnabled) {
+    // In production, hasUsableSavedConfig must be true.
+    if (!hasUsableSavedConfig && !legacyFallbackEnabled) {
       setError(t.incompleteCredentialsError);
       setState('error');
       return;
@@ -373,6 +387,12 @@ export default function App() {
       setState('error');
     }
   };
+
+  const showProvisioningError =
+    state === 'disconnected' &&
+    (provisionState === 'failed' || provisionState === 'incomplete') &&
+    provisionError !== '' &&
+    !hasUsableSavedConfig;
 
   const status = t[state];
   const time = `${String(Math.floor(seconds / 3600)).padStart(2, '0')}:${String(
@@ -456,7 +476,7 @@ export default function App() {
             <button
               className={`connect ${state}`}
               onClick={toggle}
-              disabled={state === 'connecting' || state === 'disconnecting' || (!hasValidConfig && !legacyFallbackEnabled && isNativeAndroid())}
+              disabled={state === 'connecting' || state === 'disconnecting' || (!hasUsableSavedConfig && !legacyFallbackEnabled && isNativeAndroid())}
             >
               <Shield />
               <strong>{state === 'connected' ? t.disconnect : t.connect}</strong>
@@ -476,7 +496,7 @@ export default function App() {
                     ✓ {t.deviceRegistered}
                   </p>
                 )}
-                {!hasValidConfig && provisionState === 'failed' && (
+                {showProvisioningError && provisionState === 'failed' && (
                   <div>
                     <p style={{ color: '#ff0055', fontSize: '14px', margin: '4px 0' }}>
                       {t.registrationFailed}
@@ -494,7 +514,7 @@ export default function App() {
                     </button>
                   </div>
                 )}
-                {!hasValidConfig && provisionState === 'incomplete' && (
+                {showProvisioningError && provisionState === 'incomplete' && (
                   <div>
                     <p style={{ color: '#ff0055', fontSize: '14px', margin: '4px 0' }}>
                       {t.incompleteCredentialsError}

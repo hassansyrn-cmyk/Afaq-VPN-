@@ -127,6 +127,45 @@ class AfaqVpnPlugin : Plugin() {
     }
 
     @PluginMethod
+    fun getConfigStatus(call: PluginCall) {
+        val result = JSObject()
+        val address = AfaqSecureStorage.getString(context, "wg_address")?.trim().orEmpty()
+        val dns = AfaqSecureStorage.getString(context, "wg_dns")?.trim().orEmpty()
+        val publicKey = AfaqSecureStorage.getString(context, "wg_server_public_key")?.trim().orEmpty()
+        val endpoint = AfaqSecureStorage.getString(context, "wg_endpoint")?.trim().orEmpty()
+        val allowedIps = AfaqSecureStorage.getString(context, "wg_allowed_ips")?.trim().orEmpty()
+
+        val localKeyPair = AfaqIdentityManager.getOrCreateWireGuardKeyPair(context)
+        val privateKey = localKeyPair.first
+
+        val hasDynamicConfig = privateKey.isNotBlank() &&
+                address.isNotBlank() &&
+                dns.isNotBlank() &&
+                publicKey.isNotBlank() &&
+                endpoint.isNotBlank() &&
+                allowedIps.isNotBlank()
+
+        if (hasDynamicConfig) {
+            result.put("exists", true)
+            result.put("valid", true)
+            result.put("source", "dynamic")
+        } else {
+            val isDebug = BuildConfig.DEBUG
+            val legacyEnabled = BuildConfig.ENABLE_LEGACY_DEBUG_FALLBACK
+            if (isDebug && legacyEnabled) {
+                result.put("exists", true)
+                result.put("valid", true)
+                result.put("source", "legacy")
+            } else {
+                result.put("exists", false)
+                result.put("valid", false)
+                result.put("source", "none")
+            }
+        }
+        call.resolve(result)
+    }
+
+    @PluginMethod
     fun provisionDevice(call: PluginCall) {
         if (!isProvisioningInProgress.compareAndSet(false, true)) {
             val res = JSObject()
@@ -230,7 +269,20 @@ class AfaqVpnPlugin : Plugin() {
             return
         }
 
-        val isRegistered = AfaqSecureStorage.getBoolean(context, "is_registered", false)
+        val localKeyPair = AfaqIdentityManager.getOrCreateWireGuardKeyPair(context)
+        val dynPrivateKey = localKeyPair.first
+        val dynAddress = AfaqSecureStorage.getString(context, "wg_address")?.trim().orEmpty()
+        val dynDns = AfaqSecureStorage.getString(context, "wg_dns")?.trim().orEmpty()
+        val dynPublicKey = AfaqSecureStorage.getString(context, "wg_server_public_key")?.trim().orEmpty()
+        val dynEndpoint = AfaqSecureStorage.getString(context, "wg_endpoint")?.trim().orEmpty()
+        val dynAllowedIps = AfaqSecureStorage.getString(context, "wg_allowed_ips")?.trim().orEmpty()
+
+        val hasDynamicConfig = dynPrivateKey.isNotBlank() &&
+                dynAddress.isNotBlank() &&
+                dynDns.isNotBlank() &&
+                dynPublicKey.isNotBlank() &&
+                dynEndpoint.isNotBlank() &&
+                dynAllowedIps.isNotBlank()
 
         val privateKey: String
         val address: String
@@ -241,22 +293,16 @@ class AfaqVpnPlugin : Plugin() {
         val allowedIps: String
         val persistentKeepalive: Int
 
-        if (isRegistered) {
+        if (hasDynamicConfig) {
             // Use dynamically provisioned WireGuard credentials
-            val localKeyPair = AfaqIdentityManager.getOrCreateWireGuardKeyPair(context)
-            privateKey = localKeyPair.first
-            address = AfaqSecureStorage.getString(context, "wg_address")?.trim().orEmpty()
-            dns = AfaqSecureStorage.getString(context, "wg_dns")?.trim().orEmpty()
-            publicKey = AfaqSecureStorage.getString(context, "wg_server_public_key")?.trim().orEmpty()
+            privateKey = dynPrivateKey
+            address = dynAddress
+            dns = dynDns
+            publicKey = dynPublicKey
             presharedKey = AfaqSecureStorage.getString(context, "wg_preshared_key")?.trim().orEmpty()
-            endpoint = AfaqSecureStorage.getString(context, "wg_endpoint")?.trim().orEmpty()
-            allowedIps = AfaqSecureStorage.getString(context, "wg_allowed_ips")?.trim().orEmpty()
+            endpoint = dynEndpoint
+            allowedIps = dynAllowedIps
             persistentKeepalive = AfaqSecureStorage.getString(context, "wg_persistent_keepalive")?.toIntOrNull() ?: 25
-
-            if (privateKey.isBlank() || address.isBlank() || dns.isBlank() || publicKey.isBlank() || endpoint.isBlank() || allowedIps.isBlank()) {
-                call.reject("Secure credentials are incomplete. Please register this device again.")
-                return
-            }
         } else {
             // Try to fall back to legacy credentials in internal debug builds only
             val isDebug = BuildConfig.DEBUG
