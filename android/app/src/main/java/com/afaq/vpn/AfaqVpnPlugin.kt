@@ -99,13 +99,27 @@ class AfaqVpnPlugin : Plugin() {
         val isRegistered = AfaqSecureStorage.getBoolean(context, "is_registered", false)
         val hasIdentity = AfaqIdentityManager.hasIdentity(context)
 
+        val localKeyPair = AfaqIdentityManager.getOrCreateWireGuardKeyPair(context)
+        val privateKey = localKeyPair.first
+        val address = AfaqSecureStorage.getString(context, "wg_address")?.trim().orEmpty()
+        val dns = AfaqSecureStorage.getString(context, "wg_dns")?.trim().orEmpty()
+        val publicKey = AfaqSecureStorage.getString(context, "wg_server_public_key")?.trim().orEmpty()
+        val endpoint = AfaqSecureStorage.getString(context, "wg_endpoint")?.trim().orEmpty()
+        val allowedIps = AfaqSecureStorage.getString(context, "wg_allowed_ips")?.trim().orEmpty()
+
+        val hasValidConfig = privateKey.isNotBlank() &&
+                address.isNotBlank() &&
+                dns.isNotBlank() &&
+                publicKey.isNotBlank() &&
+                endpoint.isNotBlank() &&
+                allowedIps.isNotBlank()
+
         result.put("isRegistered", isRegistered)
         result.put("hasIdentity", hasIdentity)
         result.put("legacyFallbackEnabled", BuildConfig.ENABLE_LEGACY_DEBUG_FALLBACK)
+        result.put("hasValidConfig", hasValidConfig)
 
         if (isRegistered) {
-            val address = AfaqSecureStorage.getString(context, "wg_address") ?: ""
-            val endpoint = AfaqSecureStorage.getString(context, "wg_endpoint") ?: ""
             result.put("address", address)
             result.put("endpoint", endpoint)
         }
@@ -279,6 +293,18 @@ class AfaqVpnPlugin : Plugin() {
                 call.reject("Incomplete WireGuard configuration")
                 return
             }
+        }
+
+        val allowedIpsList = allowedIps.split(",").map { it.trim() }
+        if (!allowedIpsList.contains("0.0.0.0/0")) {
+            call.reject("Full-tunnel connection requires '0.0.0.0/0' in AllowedIPs.")
+            return
+        }
+
+        val supportsIPv6 = address.contains(":") || dns.contains(":") || allowedIpsList.any { it.contains(":") }
+        if (supportsIPv6 && !allowedIpsList.contains("::/0")) {
+            call.reject("IPv6-configured connection requires '::/0' in AllowedIPs.")
+            return
         }
 
         if (persistentKeepalive !in 0..65535) {
