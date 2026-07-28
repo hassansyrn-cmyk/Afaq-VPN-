@@ -471,12 +471,12 @@ export default function App() {
                     {t.preparingSecureConnection}...
                   </p>
                 )}
-                {provisionState === 'registered' && (
+                {hasValidConfig && provisionState === 'registered' && (
                   <p style={{ color: '#00cc88', fontSize: '14px', margin: '4px 0' }}>
                     ✓ {t.deviceRegistered}
                   </p>
                 )}
-                {state !== 'connected' && provisionState === 'failed' && (
+                {!hasValidConfig && provisionState === 'failed' && (
                   <div>
                     <p style={{ color: '#ff0055', fontSize: '14px', margin: '4px 0' }}>
                       {t.registrationFailed}
@@ -494,7 +494,7 @@ export default function App() {
                     </button>
                   </div>
                 )}
-                {state !== 'connected' && provisionState === 'incomplete' && (
+                {!hasValidConfig && provisionState === 'incomplete' && (
                   <div>
                     <p style={{ color: '#ff0055', fontSize: '14px', margin: '4px 0' }}>
                       {t.incompleteCredentialsError}
