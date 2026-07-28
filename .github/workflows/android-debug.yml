@@ -92,11 +92,11 @@ jobs:
 
       - name: Run Android unit tests
         working-directory: android
-        run: ./gradlew testDebugUnitTest --stacktrace
+        run: ./gradlew testDebugUnitTest -PAFAQ_ENABLE_LEGACY_DEBUG_FALLBACK=true --stacktrace
 
       - name: Build Debug APK
         working-directory: android
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug -PAFAQ_ENABLE_LEGACY_DEBUG_FALLBACK=true --stacktrace
 
       - name: Verify APK
         run: |

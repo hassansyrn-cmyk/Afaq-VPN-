@@ -19,6 +19,8 @@ import com.getcapacitor.annotation.CapacitorPlugin
 @CapacitorPlugin(name = "AfaqVpn")
 class AfaqVpnPlugin : Plugin() {
 
+    private val isProvisioningInProgress = java.util.concurrent.atomic.AtomicBoolean(false)
+
     private val stateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action != AfaqVpnService.ACTION_STATE) {
@@ -92,38 +94,262 @@ class AfaqVpnPlugin : Plugin() {
     }
 
     @PluginMethod
+    fun getProvisioningStatus(call: PluginCall) {
+        val result = JSObject()
+        val isRegistered = AfaqSecureStorage.getBoolean(context, "is_registered", false)
+        val hasIdentity = AfaqIdentityManager.hasIdentity(context)
+
+        val localKeyPair = AfaqIdentityManager.getOrCreateWireGuardKeyPair(context)
+        val privateKey = localKeyPair.first
+        val address = AfaqSecureStorage.getString(context, "wg_address")?.trim().orEmpty()
+        val dns = AfaqSecureStorage.getString(context, "wg_dns")?.trim().orEmpty()
+        val publicKey = AfaqSecureStorage.getString(context, "wg_server_public_key")?.trim().orEmpty()
+        val endpoint = AfaqSecureStorage.getString(context, "wg_endpoint")?.trim().orEmpty()
+        val allowedIps = AfaqSecureStorage.getString(context, "wg_allowed_ips")?.trim().orEmpty()
+
+        val hasValidConfig = privateKey.isNotBlank() &&
+                address.isNotBlank() &&
+                dns.isNotBlank() &&
+                publicKey.isNotBlank() &&
+                endpoint.isNotBlank() &&
+                allowedIps.isNotBlank()
+
+        result.put("isRegistered", isRegistered)
+        result.put("hasIdentity", hasIdentity)
+        result.put("legacyFallbackEnabled", BuildConfig.ENABLE_LEGACY_DEBUG_FALLBACK)
+        result.put("hasValidConfig", hasValidConfig)
+
+        if (isRegistered) {
+            result.put("address", address)
+            result.put("endpoint", endpoint)
+        }
+        call.resolve(result)
+    }
+
+    @PluginMethod
+    fun getConfigStatus(call: PluginCall) {
+        val result = JSObject()
+        val address = AfaqSecureStorage.getString(context, "wg_address")?.trim().orEmpty()
+        val dns = AfaqSecureStorage.getString(context, "wg_dns")?.trim().orEmpty()
+        val publicKey = AfaqSecureStorage.getString(context, "wg_server_public_key")?.trim().orEmpty()
+        val endpoint = AfaqSecureStorage.getString(context, "wg_endpoint")?.trim().orEmpty()
+        val allowedIps = AfaqSecureStorage.getString(context, "wg_allowed_ips")?.trim().orEmpty()
+
+        val localKeyPair = AfaqIdentityManager.getOrCreateWireGuardKeyPair(context)
+        val privateKey = localKeyPair.first
+
+        val hasDynamicConfig = privateKey.isNotBlank() &&
+                address.isNotBlank() &&
+                dns.isNotBlank() &&
+                publicKey.isNotBlank() &&
+                endpoint.isNotBlank() &&
+                allowedIps.isNotBlank()
+
+        if (hasDynamicConfig) {
+            result.put("exists", true)
+            result.put("valid", true)
+            result.put("source", "dynamic")
+        } else {
+            val isDebug = BuildConfig.DEBUG
+            val legacyEnabled = BuildConfig.ENABLE_LEGACY_DEBUG_FALLBACK
+            if (isDebug && legacyEnabled) {
+                result.put("exists", true)
+                result.put("valid", true)
+                result.put("source", "legacy")
+            } else {
+                result.put("exists", false)
+                result.put("valid", false)
+                result.put("source", "none")
+            }
+        }
+        call.resolve(result)
+    }
+
+    @PluginMethod
+    fun provisionDevice(call: PluginCall) {
+        if (!isProvisioningInProgress.compareAndSet(false, true)) {
+            val res = JSObject()
+            res.put("state", "failed")
+            res.put("error", "Provisioning is already in progress.")
+            res.put("isRecoverableError", false)
+            res.put("retryAfterSeconds", 0)
+            call.resolve(res)
+            return
+        }
+
+        val deviceId = AfaqIdentityManager.getOrCreateInstallationId(context)
+        val keyPair = AfaqIdentityManager.getOrCreateWireGuardKeyPair(context)
+        val publicKey = keyPair.second
+
+        val integrityManager = AfaqIntegrityManager(context)
+        val isDebug = BuildConfig.DEBUG
+        val projectNumber = AfaqIntegrityConfig.GOOGLE_CLOUD_PROJECT_NUMBER
+
+        if (!isDebug && projectNumber == 0L) {
+            isProvisioningInProgress.set(false)
+            call.reject("Real Google Cloud Project Number is not configured. Play Integrity is required in production release builds.")
+            return
+        }
+
+        if (projectNumber == 0L) {
+            // Debug build bypass of Google Play Integrity token retrieval
+            AfaqRegisterClient.register(
+                context,
+                deviceId,
+                publicKey,
+                null,
+                object : AfaqRegisterClient.RegisterCallback {
+                    override fun onSuccess(existing: Boolean) {
+                        isProvisioningInProgress.set(false)
+                        val res = JSObject()
+                        res.put("state", "registered")
+                        res.put("existing", existing)
+                        call.resolve(res)
+                    }
+
+                    override fun onFailure(errorMessage: String, isRecoverableError: Boolean, retryAfterSeconds: Int) {
+                        isProvisioningInProgress.set(false)
+                        val res = JSObject()
+                        res.put("state", "failed")
+                        res.put("error", errorMessage)
+                        res.put("isRecoverableError", isRecoverableError)
+                        res.put("retryAfterSeconds", retryAfterSeconds)
+                        call.resolve(res)
+                    }
+                }
+            )
+        } else {
+            // Standard Play Integrity flow
+            integrityManager.requestToken(deviceId, publicKey, object : AfaqIntegrityManager.TokenCallback {
+                override fun onSuccess(token: String) {
+                    AfaqRegisterClient.register(
+                        context,
+                        deviceId,
+                        publicKey,
+                        token,
+                        object : AfaqRegisterClient.RegisterCallback {
+                            override fun onSuccess(existing: Boolean) {
+                                isProvisioningInProgress.set(false)
+                                val res = JSObject()
+                                res.put("state", "registered")
+                                res.put("existing", existing)
+                                call.resolve(res)
+                            }
+
+                            override fun onFailure(errorMessage: String, isRecoverableError: Boolean, retryAfterSeconds: Int) {
+                                isProvisioningInProgress.set(false)
+                                val res = JSObject()
+                                res.put("state", "failed")
+                                res.put("error", errorMessage)
+                                res.put("isRecoverableError", isRecoverableError)
+                                res.put("retryAfterSeconds", retryAfterSeconds)
+                                call.resolve(res)
+                            }
+                        }
+                    )
+                }
+
+                override fun onFailure(error: Exception) {
+                    isProvisioningInProgress.set(false)
+                    val res = JSObject()
+                    res.put("state", "failed")
+                    res.put("error", "Play Integrity failed: ${error.message}")
+                    res.put("isRecoverableError", false)
+                    res.put("retryAfterSeconds", 10)
+                    call.resolve(res)
+                }
+            })
+        }
+    }
+
+    @PluginMethod
     fun connect(call: PluginCall) {
         if (VpnService.prepare(context) != null) {
             call.reject("VPN permission has not been granted")
             return
         }
 
-        val config = call.getObject("config")
+        val localKeyPair = AfaqIdentityManager.getOrCreateWireGuardKeyPair(context)
+        val dynPrivateKey = localKeyPair.first
+        val dynAddress = AfaqSecureStorage.getString(context, "wg_address")?.trim().orEmpty()
+        val dynDns = AfaqSecureStorage.getString(context, "wg_dns")?.trim().orEmpty()
+        val dynPublicKey = AfaqSecureStorage.getString(context, "wg_server_public_key")?.trim().orEmpty()
+        val dynEndpoint = AfaqSecureStorage.getString(context, "wg_endpoint")?.trim().orEmpty()
+        val dynAllowedIps = AfaqSecureStorage.getString(context, "wg_allowed_ips")?.trim().orEmpty()
 
-        if (config == null) {
-            call.reject("Missing WireGuard configuration")
+        val hasDynamicConfig = dynPrivateKey.isNotBlank() &&
+                dynAddress.isNotBlank() &&
+                dynDns.isNotBlank() &&
+                dynPublicKey.isNotBlank() &&
+                dynEndpoint.isNotBlank() &&
+                dynAllowedIps.isNotBlank()
+
+        val privateKey: String
+        val address: String
+        val dns: String
+        val publicKey: String
+        val presharedKey: String
+        val endpoint: String
+        val allowedIps: String
+        val persistentKeepalive: Int
+
+        if (hasDynamicConfig) {
+            // Use dynamically provisioned WireGuard credentials
+            privateKey = dynPrivateKey
+            address = dynAddress
+            dns = dynDns
+            publicKey = dynPublicKey
+            presharedKey = AfaqSecureStorage.getString(context, "wg_preshared_key")?.trim().orEmpty()
+            endpoint = dynEndpoint
+            allowedIps = dynAllowedIps
+            persistentKeepalive = AfaqSecureStorage.getString(context, "wg_persistent_keepalive")?.toIntOrNull() ?: 25
+        } else {
+            // Try to fall back to legacy credentials in internal debug builds only
+            val isDebug = BuildConfig.DEBUG
+            val legacyEnabled = BuildConfig.ENABLE_LEGACY_DEBUG_FALLBACK
+
+            if (!isDebug || !legacyEnabled) {
+                call.reject("Secure credentials are incomplete. Please register this device again.")
+                return
+            }
+
+            val config = call.getObject("config")
+            if (config == null) {
+                call.reject("Missing WireGuard configuration")
+                return
+            }
+
+            privateKey = config.getString("privateKey")?.trim().orEmpty()
+            address = config.getString("address")?.trim().orEmpty()
+            dns = config.getString("dns")?.trim().orEmpty()
+            publicKey = config.getString("publicKey")?.trim().orEmpty()
+            presharedKey = config.getString("presharedKey")?.trim().orEmpty()
+            endpoint = config.getString("endpoint")?.trim().orEmpty()
+            allowedIps = config.getString("allowedIps")?.trim().orEmpty()
+            persistentKeepalive = config.getInteger("persistentKeepalive") ?: 25
+
+            if (
+                privateKey.isBlank() ||
+                address.isBlank() ||
+                dns.isBlank() ||
+                publicKey.isBlank() ||
+                endpoint.isBlank() ||
+                allowedIps.isBlank()
+            ) {
+                call.reject("Incomplete WireGuard configuration")
+                return
+            }
+        }
+
+        val allowedIpsList = allowedIps.split(",").map { it.trim() }
+        if (!allowedIpsList.contains("0.0.0.0/0")) {
+            call.reject("Full-tunnel connection requires '0.0.0.0/0' in AllowedIPs.")
             return
         }
 
-        val privateKey = config.getString("privateKey")?.trim().orEmpty()
-        val address = config.getString("address")?.trim().orEmpty()
-        val dns = config.getString("dns")?.trim().orEmpty()
-        val publicKey = config.getString("publicKey")?.trim().orEmpty()
-        val presharedKey = config.getString("presharedKey")?.trim().orEmpty()
-        val endpoint = config.getString("endpoint")?.trim().orEmpty()
-        val allowedIps = config.getString("allowedIps")?.trim().orEmpty()
-        val persistentKeepalive =
-            config.getInteger("persistentKeepalive") ?: 25
-
-        if (
-            privateKey.isBlank() ||
-            address.isBlank() ||
-            dns.isBlank() ||
-            publicKey.isBlank() ||
-            endpoint.isBlank() ||
-            allowedIps.isBlank()
-        ) {
-            call.reject("Incomplete WireGuard configuration")
+        val supportsIPv6 = address.contains(":") || dns.contains(":") || allowedIpsList.any { it.contains(":") }
+        if (supportsIPv6 && !allowedIpsList.contains("::/0")) {
+            call.reject("IPv6-configured connection requires '::/0' in AllowedIPs.")
             return
         }
 

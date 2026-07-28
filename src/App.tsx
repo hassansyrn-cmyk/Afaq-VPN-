@@ -45,8 +45,13 @@ const IP_ENDPOINTS = [
 async function fetchWithTimeout(url: string, timeoutMs: number = 2500): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
+  const separator = url.includes('?') ? '&' : '?';
+  const cacheBustUrl = `${url}${separator}_t=${Date.now()}`;
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    const response = await fetch(cacheBustUrl, {
+      signal: controller.signal,
+      cache: 'no-store'
+    });
     clearTimeout(id);
     return response;
   } catch (err) {
@@ -121,7 +126,36 @@ export default function App() {
   const [afterIp, setAfterIp] = useState('');
   const [pingVal, setPingVal] = useState<number | null>(null);
 
+  // New states for device provisioning
+  const [isRegistered, setIsRegistered] = useState<boolean>(false);
+  const [legacyFallbackEnabled, setLegacyFallbackEnabled] = useState<boolean>(false);
+  const [hasValidConfig, setHasValidConfig] = useState<boolean>(false);
+  const [hasUsableSavedConfig, setHasUsableSavedConfig] = useState<boolean>(false);
+  const [provisionState, setProvisionState] = useState<'idle' | 'preparing' | 'registered' | 'failed' | 'incomplete'>('idle');
+  const [provisionError, setProvisionError] = useState<string>('');
+  const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
+  const [isProvisioning, setIsProvisioning] = useState<boolean>(false);
+
   const cfg = useMemo(envConfig, []);
+
+  const refreshConfigStatus = async () => {
+    if (!isNativeAndroid()) return;
+    try {
+      const status = await AfaqVpn.getConfigStatus();
+      setHasUsableSavedConfig(status.valid);
+    } catch (_) {
+      setHasUsableSavedConfig(false);
+    }
+  };
+
+  // Cooldown countdown timer
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const id = setInterval(() => {
+      setCooldownSeconds((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [cooldownSeconds]);
 
   useEffect(() => {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -140,6 +174,62 @@ export default function App() {
     }, 1000);
     return () => clearInterval(id);
   }, [state, started]);
+
+  const handleProvision = async () => {
+    if (!isNativeAndroid() || isProvisioning || cooldownSeconds > 0) return;
+    setIsProvisioning(true);
+    setProvisionState('preparing');
+    setProvisionError('');
+    try {
+      const res = await AfaqVpn.provisionDevice();
+      if (res.state === 'registered') {
+        setProvisionState('registered');
+        setIsRegistered(true);
+        setHasValidConfig(true);
+        await refreshConfigStatus();
+      } else {
+        if (res.retryAfterSeconds && res.retryAfterSeconds > 0) {
+          setCooldownSeconds(res.retryAfterSeconds);
+        } else {
+          setCooldownSeconds(10); // Default local cooldown for network or temporary failures
+        }
+
+        if (res.isRecoverableError) {
+          setProvisionState('incomplete');
+          setProvisionError(t.incompleteCredentialsError);
+        } else {
+          setProvisionState('failed');
+          const errorMsg = res.error === 'TOO_MANY_REQUESTS' ? t.tooManyRequests : (res.error || t.registrationFailed);
+          setProvisionError(errorMsg);
+        }
+      }
+    } catch (err) {
+      setCooldownSeconds(10); // Default cooldown on failure
+      setProvisionState('failed');
+      setProvisionError(String(err));
+    } finally {
+      setIsProvisioning(false);
+    }
+  };
+
+  // Check provisioning status & start initial provisioning if not registered
+  useEffect(() => {
+    if (!isNativeAndroid()) return;
+    refreshConfigStatus().then(() => {
+      AfaqVpn.getProvisioningStatus()
+        .then((status) => {
+          setIsRegistered(status.isRegistered);
+          setLegacyFallbackEnabled(status.legacyFallbackEnabled || false);
+          setHasValidConfig(status.hasValidConfig || false);
+          if (status.isRegistered) {
+            setProvisionState('registered');
+          } else {
+            handleProvision();
+          }
+        })
+        .catch(() => {});
+    });
+  }, []);
 
   // Connection status & status changed listeners
   useEffect(() => {
@@ -173,9 +263,41 @@ export default function App() {
         .then(setBeforeIp)
         .catch(() => setBeforeIp(''));
     } else if (state === 'connected') {
-      getPublicIP()
-        .then(setAfterIp)
-        .catch(() => setAfterIp('139.185.58.102'));
+      let isCurrent = true;
+      const fetchAfterIpWithRetry = async () => {
+        // Wait approximately 2.5 seconds
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+        if (!isCurrent) return;
+
+        try {
+          const ip = await getPublicIP();
+          if (isCurrent) {
+            setAfterIp(ip);
+          }
+        } catch (_) {
+          if (!isCurrent) return;
+          // Retry once after 2 seconds if settling
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          if (!isCurrent) return;
+
+          try {
+            const retryIp = await getPublicIP();
+            if (isCurrent) {
+              setAfterIp(retryIp);
+            }
+          } catch (_) {
+            if (isCurrent) {
+              setAfterIp('Unable to verify');
+            }
+          }
+        }
+      };
+
+      fetchAfterIpWithRetry();
+
+      return () => {
+        isCurrent = false;
+      };
     }
   }, [state]);
 
@@ -232,12 +354,16 @@ export default function App() {
       }
       return;
     }
-    if (!configReady(cfg)) {
-      setError(t.unavailable);
+
+    // In production, hasUsableSavedConfig must be true.
+    if (!hasUsableSavedConfig && !legacyFallbackEnabled) {
+      setError(t.incompleteCredentialsError);
       setState('error');
       return;
     }
+
     setState('connecting');
+    setAfterIp('');
     setTraffic({ receivedBytes: 0, transmittedBytes: 0 });
     try {
       const p = await AfaqVpn.prepareVpn();
@@ -245,12 +371,28 @@ export default function App() {
         setState('disconnected');
         return;
       }
+
+      // Capture "Before" IP immediately before calling connect
+      try {
+        const bip = await getPublicIP();
+        setBeforeIp(bip);
+      } catch (_) {
+        setBeforeIp('Unable to verify');
+      }
+
+      // Connect without passing hardcoded config (or legacy fallback in debug if permitted natively)
       await AfaqVpn.connect({ config: cfg });
     } catch (e) {
       setError(String(e));
       setState('error');
     }
   };
+
+  const showProvisioningError =
+    state === 'disconnected' &&
+    (provisionState === 'failed' || provisionState === 'incomplete') &&
+    provisionError !== '' &&
+    !hasUsableSavedConfig;
 
   const status = t[state];
   const time = `${String(Math.floor(seconds / 3600)).padStart(2, '0')}:${String(
@@ -330,15 +472,66 @@ export default function App() {
               <span />
               {state === 'connected' ? t.protected : t.unprotected}
             </section>
+
             <button
               className={`connect ${state}`}
               onClick={toggle}
-              disabled={state === 'connecting' || state === 'disconnecting'}
+              disabled={state === 'connecting' || state === 'disconnecting' || (!hasUsableSavedConfig && !legacyFallbackEnabled && isNativeAndroid())}
             >
               <Shield />
               <strong>{state === 'connected' ? t.disconnect : t.connect}</strong>
               <small>{status}</small>
             </button>
+
+            {/* Device provisioning state display near the Connect button */}
+            {isNativeAndroid() && (
+              <div className="provisioning-status" style={{ textAlign: 'center', marginTop: '12px', marginBottom: '12px' }}>
+                {provisionState === 'preparing' && (
+                  <p style={{ color: '#0070f3', fontSize: '14px', margin: '4px 0' }}>
+                    {t.preparingSecureConnection}...
+                  </p>
+                )}
+                {hasValidConfig && provisionState === 'registered' && (
+                  <p style={{ color: '#00cc88', fontSize: '14px', margin: '4px 0' }}>
+                    ✓ {t.deviceRegistered}
+                  </p>
+                )}
+                {showProvisioningError && provisionState === 'failed' && (
+                  <div>
+                    <p style={{ color: '#ff0055', fontSize: '14px', margin: '4px 0' }}>
+                      {t.registrationFailed}
+                    </p>
+                    {provisionError && (
+                      <p style={{ fontSize: '12px', color: '#888', margin: '2px 0 8px 0' }}>{provisionError}</p>
+                    )}
+                    <button
+                      onClick={handleProvision}
+                      className="secondary"
+                      disabled={isProvisioning || cooldownSeconds > 0}
+                      style={{ padding: '4px 12px', fontSize: '12px', margin: '4px auto', display: 'block', minHeight: '32px' }}
+                    >
+                      {cooldownSeconds > 0 ? `${t.retry} (${cooldownSeconds}s)` : t.retry}
+                    </button>
+                  </div>
+                )}
+                {showProvisioningError && provisionState === 'incomplete' && (
+                  <div>
+                    <p style={{ color: '#ff0055', fontSize: '14px', margin: '4px 0' }}>
+                      {t.incompleteCredentialsError}
+                    </p>
+                    <button
+                      onClick={handleProvision}
+                      className="secondary"
+                      disabled={isProvisioning || cooldownSeconds > 0}
+                      style={{ padding: '4px 12px', fontSize: '12px', margin: '4px auto', display: 'block', minHeight: '32px' }}
+                    >
+                      {cooldownSeconds > 0 ? `${t.retry} (${cooldownSeconds}s)` : t.retry}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {error && <div className="error">{error}</div>}
             <section className="serverCard">
               <div>
@@ -363,8 +556,13 @@ export default function App() {
             </section>
             <section className="ipCard">
               <b>{t.ip}</b>
-              <span>{t.before}: {beforeIp || t.notAvailable}</span>
-              <span>{t.after}: {afterIp || t.notAvailable}</span>
+              <span>{t.before}: {beforeIp === 'Unable to verify' ? t.unableToVerify : (beforeIp || t.notAvailable)}</span>
+              <span>{t.after}: {afterIp === 'Unable to verify' ? t.unableToVerify : (afterIp || t.notAvailable)}</span>
+              {afterIp && beforeIp && afterIp !== 'Unable to verify' && beforeIp !== 'Unable to verify' && afterIp === beforeIp && (
+                <div style={{ color: '#ff0055', fontSize: '13px', marginTop: '6px', fontWeight: 'bold', textAlign: 'center' }}>
+                  ⚠️ {t.ipNotChanged}
+                </div>
+              )}
             </section>
           </>
         )}
