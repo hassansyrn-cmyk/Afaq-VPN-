@@ -45,8 +45,13 @@ const IP_ENDPOINTS = [
 async function fetchWithTimeout(url: string, timeoutMs: number = 2500): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
+  const separator = url.includes('?') ? '&' : '?';
+  const cacheBustUrl = `${url}${separator}_t=${Date.now()}`;
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    const response = await fetch(cacheBustUrl, {
+      signal: controller.signal,
+      cache: 'no-store'
+    });
     clearTimeout(id);
     return response;
   } catch (err) {
@@ -124,6 +129,7 @@ export default function App() {
   // New states for device provisioning
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const [legacyFallbackEnabled, setLegacyFallbackEnabled] = useState<boolean>(false);
+  const [hasValidConfig, setHasValidConfig] = useState<boolean>(false);
   const [provisionState, setProvisionState] = useState<'idle' | 'preparing' | 'registered' | 'failed' | 'incomplete'>('idle');
   const [provisionError, setProvisionError] = useState<string>('');
   const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
@@ -168,6 +174,7 @@ export default function App() {
       if (res.state === 'registered') {
         setProvisionState('registered');
         setIsRegistered(true);
+        setHasValidConfig(true);
       } else {
         if (res.retryAfterSeconds && res.retryAfterSeconds > 0) {
           setCooldownSeconds(res.retryAfterSeconds);
@@ -200,6 +207,7 @@ export default function App() {
       .then((status) => {
         setIsRegistered(status.isRegistered);
         setLegacyFallbackEnabled(status.legacyFallbackEnabled || false);
+        setHasValidConfig(status.hasValidConfig || false);
         if (status.isRegistered) {
           setProvisionState('registered');
         } else {
@@ -241,9 +249,41 @@ export default function App() {
         .then(setBeforeIp)
         .catch(() => setBeforeIp(''));
     } else if (state === 'connected') {
-      getPublicIP()
-        .then(setAfterIp)
-        .catch(() => setAfterIp('139.185.58.102'));
+      let isCurrent = true;
+      const fetchAfterIpWithRetry = async () => {
+        // Wait approximately 2.5 seconds
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+        if (!isCurrent) return;
+
+        try {
+          const ip = await getPublicIP();
+          if (isCurrent) {
+            setAfterIp(ip);
+          }
+        } catch (_) {
+          if (!isCurrent) return;
+          // Retry once after 2 seconds if settling
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          if (!isCurrent) return;
+
+          try {
+            const retryIp = await getPublicIP();
+            if (isCurrent) {
+              setAfterIp(retryIp);
+            }
+          } catch (_) {
+            if (isCurrent) {
+              setAfterIp('Unable to verify');
+            }
+          }
+        }
+      };
+
+      fetchAfterIpWithRetry();
+
+      return () => {
+        isCurrent = false;
+      };
     }
   }, [state]);
 
@@ -301,14 +341,15 @@ export default function App() {
       return;
     }
 
-    // In production, isRegistered must be true.
-    if (!isRegistered && !legacyFallbackEnabled) {
+    // In production, hasValidConfig must be true.
+    if (!hasValidConfig && !legacyFallbackEnabled) {
       setError(t.incompleteCredentialsError);
       setState('error');
       return;
     }
 
     setState('connecting');
+    setAfterIp('');
     setTraffic({ receivedBytes: 0, transmittedBytes: 0 });
     try {
       const p = await AfaqVpn.prepareVpn();
@@ -316,6 +357,15 @@ export default function App() {
         setState('disconnected');
         return;
       }
+
+      // Capture "Before" IP immediately before calling connect
+      try {
+        const bip = await getPublicIP();
+        setBeforeIp(bip);
+      } catch (_) {
+        setBeforeIp('Unable to verify');
+      }
+
       // Connect without passing hardcoded config (or legacy fallback in debug if permitted natively)
       await AfaqVpn.connect({ config: cfg });
     } catch (e) {
@@ -406,7 +456,7 @@ export default function App() {
             <button
               className={`connect ${state}`}
               onClick={toggle}
-              disabled={state === 'connecting' || state === 'disconnecting' || (!isRegistered && !legacyFallbackEnabled && isNativeAndroid())}
+              disabled={state === 'connecting' || state === 'disconnecting' || (!hasValidConfig && !legacyFallbackEnabled && isNativeAndroid())}
             >
               <Shield />
               <strong>{state === 'connected' ? t.disconnect : t.connect}</strong>
@@ -426,7 +476,7 @@ export default function App() {
                     ✓ {t.deviceRegistered}
                   </p>
                 )}
-                {provisionState === 'failed' && (
+                {state !== 'connected' && provisionState === 'failed' && (
                   <div>
                     <p style={{ color: '#ff0055', fontSize: '14px', margin: '4px 0' }}>
                       {t.registrationFailed}
@@ -444,7 +494,7 @@ export default function App() {
                     </button>
                   </div>
                 )}
-                {provisionState === 'incomplete' && (
+                {state !== 'connected' && provisionState === 'incomplete' && (
                   <div>
                     <p style={{ color: '#ff0055', fontSize: '14px', margin: '4px 0' }}>
                       {t.incompleteCredentialsError}
@@ -486,8 +536,13 @@ export default function App() {
             </section>
             <section className="ipCard">
               <b>{t.ip}</b>
-              <span>{t.before}: {beforeIp || t.notAvailable}</span>
-              <span>{t.after}: {afterIp || t.notAvailable}</span>
+              <span>{t.before}: {beforeIp === 'Unable to verify' ? t.unableToVerify : (beforeIp || t.notAvailable)}</span>
+              <span>{t.after}: {afterIp === 'Unable to verify' ? t.unableToVerify : (afterIp || t.notAvailable)}</span>
+              {afterIp && beforeIp && afterIp !== 'Unable to verify' && beforeIp !== 'Unable to verify' && afterIp === beforeIp && (
+                <div style={{ color: '#ff0055', fontSize: '13px', marginTop: '6px', fontWeight: 'bold', textAlign: 'center' }}>
+                  ⚠️ {t.ipNotChanged}
+                </div>
+              )}
             </section>
           </>
         )}

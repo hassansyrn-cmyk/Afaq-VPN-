@@ -5,5 +5,7 @@ export default { app:'آفاق VPN', home:'الرئيسية', servers:'الخو�
   registrationFailed: 'فشل تسجيل الجهاز',
   retry: 'إعادة المحاولة',
   incompleteCredentialsError: 'بيانات الاتصال الآمن غير مكتملة. يرجى تسجيل هذا الجهاز مجددًا.',
-  tooManyRequests: 'محاولات تسجيل كثيرة. يرجى المحاولة لاحقًا.'
+  tooManyRequests: 'محاولات تسجيل كثيرة. يرجى المحاولة لاحقًا.',
+  unableToVerify: 'غير قادر على التحقق',
+  ipNotChanged: 'لم يتغير عنوان IP العام'
 };

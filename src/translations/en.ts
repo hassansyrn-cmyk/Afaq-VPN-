@@ -5,5 +5,7 @@ export default { app:'Afaq VPN', home:'Home', servers:'Servers', settings:'Setti
   registrationFailed: 'Registration failed',
   retry: 'Retry',
   incompleteCredentialsError: 'Secure credentials are incomplete. Please register this device again.',
-  tooManyRequests: 'Too many registration attempts. Please try again later.'
+  tooManyRequests: 'Too many registration attempts. Please try again later.',
+  unableToVerify: 'Unable to verify',
+  ipNotChanged: 'Public IP did not change'
 };
