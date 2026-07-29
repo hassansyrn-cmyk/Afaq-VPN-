@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+  <meta
+    name="description"
+    content="Afaq VPN Privacy Policy in English and Arabic. Learn how Afaq VPN handles VPN provisioning, Google Play Integrity, advertising, security records, and data deletion requests."
+  >
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#071a2f">
+
+  <title>Afaq VPN Privacy Policy | سياسة الخصوصية</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #04101f;
+      --background-secondary: #071a2f;
+      --surface: rgba(10, 32, 56, 0.92);
+      --surface-soft: rgba(13, 42, 72, 0.72);
+      --border: rgba(104, 207, 255, 0.2);
+      --border-strong: rgba(104, 207, 255, 0.42);
+      --primary: #39c6f4;
+      --primary-dark: #159fce;
+      --secondary: #23d5ab;
+      --text: #f5fbff;
+      --text-secondary: #bdd0df;
+      --text-muted: #849db1;
+      --warning: #f6c768;
+      --shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
+      --radius-large: 26px;
+      --radius-medium: 18px;
+      --radius-small: 12px;
+      --content-width: 1080px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--background);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(
+          circle at 12% 0%,
+          rgba(57, 198, 244, 0.16),
+          transparent 34%
+        ),
+        radial-gradient(
+          circle at 92% 12%,
+          rgba(35, 213, 171, 0.12),
+          transparent 28%
+        ),
+        linear-gradient(
+          180deg,
+          var(--background-secondary) 0%,
+          var(--background) 52%,
+          #020a13 100%
+        );
+      color: var(--text);
+      font-family:
+        Inter,
+        "Segoe UI",
+        Tahoma,
+        Arial,
+        sans-serif;
+      line-height: 1.75;
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      content: "";
+      pointer-events: none;
+      background-image:
+        linear-gradient(
+          rgba(255, 255, 255, 0.018) 1px,
+          transparent 1px
+        ),
+        linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.018) 1px,
+          transparent 1px
+        );
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 82%);
+    }
+
+    a {
+      color: var(--primary);
+      text-underline-offset: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    a:hover {
+      color: #8ce5ff;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 100;
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: var(--text);
+      color: var(--background);
+      font-weight: 700;
+      transform: translateY(-180%);
+      transition: transform 160ms ease;
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    .page-shell {
+      width: min(calc(100% - 32px), var(--content-width));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 46px;
+      height: 46px;
+      place-items: center;
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(57, 198, 244, 0.2),
+          rgba(35, 213, 171, 0.08)
+        );
+      box-shadow: 0 12px 28px rgba(25, 169, 210, 0.18);
+    }
+
+    .brand-mark svg {
+      display: block;
+      width: 27px;
+      height: 27px;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .brand-name {
+      font-size: 1.02rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-label {
+      margin-top: 4px;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+    }
+
+    .language-switcher {
+      display: inline-flex;
+      gap: 7px;
+      padding: 6px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: rgba(4, 16, 31, 0.72);
+      backdrop-filter: blur(14px);
+    }
+
+    .language-button {
+      min-width: 92px;
+      min-height: 42px;
+      padding: 8px 15px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text-secondary);
+      font: inherit;
+      font-size: 0.91rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition:
+        color 160ms ease,
+        background 160ms ease,
+        border-color 160ms ease,
+        transform 160ms ease;
+    }
+
+    .language-button:hover {
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .language-button:active {
+      transform: scale(0.97);
+    }
+
+    .language-button.is-active {
+      border-color: rgba(57, 198, 244, 0.45);
+      background:
+        linear-gradient(
+          135deg,
+          rgba(57, 198, 244, 0.22),
+          rgba(35, 213, 171, 0.12)
+        );
+      color: #ffffff;
+    }
+
+    .language-button:focus-visible,
+    a:focus-visible {
+      outline: 3px solid rgba(57, 198, 244, 0.55);
+      outline-offset: 3px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(32px, 6vw, 66px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      background:
+        linear-gradient(
+          135deg,
+          rgba(12, 41, 70, 0.96),
+          rgba(5, 23, 40, 0.96)
+        );
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      position: absolute;
+      top: -80px;
+      right: -85px;
+      width: 260px;
+      height: 260px;
+      border: 1px solid rgba(57, 198, 244, 0.22);
+      border-radius: 50%;
+      content: "";
+      box-shadow:
+        0 0 0 38px rgba(57, 198, 244, 0.025),
+        0 0 0 76px rgba(35, 213, 171, 0.018);
+    }
+
+    [dir="rtl"] .hero::after {
+      right: auto;
+      left: -85px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px;
+      padding: 7px 12px;
+      border: 1px solid rgba(57, 198, 244, 0.26);
+      border-radius: 999px;
+      background: rgba(57, 198, 244, 0.08);
+      color: #9ce8ff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--secondary);
+      content: "";
+      box-shadow: 0 0 14px rgba(35, 213, 171, 0.8);
+    }
+
+    .hero h1 {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4.3rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    [dir="rtl"] .hero h1 {
+      letter-spacing: 0;
+    }
+
+    .hero-description {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 20px 0 0;
+      color: var(--text-secondary);
+      font-size: clamp(1rem, 2vw, 1.13rem);
+    }
+
+    .effective-date {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 26px;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    .effective-date strong {
+      color: var(--text);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr);
+      gap: 24px;
+      margin-top: 26px;
+      align-items: start;
+    }
+
+    .table-of-contents {
+      position: sticky;
+      top: 18px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-medium);
+      background: rgba(7, 26, 47, 0.82);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+      backdrop-filter: blur(14px);
+    }
+
+    .table-of-contents h2 {
+      margin: 0 0 13px;
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    .table-of-contents nav {
+      display: grid;
+      gap: 3px;
+    }
+
+    .table-of-contents a {
+      display: block;
+      padding: 7px 9px;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 0.79rem;
+      line-height: 1.35;
+      text-decoration: none;
+      transition:
+        color 150ms ease,
+        background 150ms ease;
+    }
+
+    .table-of-contents a:hover {
+      background: rgba(57, 198, 244, 0.08);
+      color: var(--text);
+    }
+
+    .policy-content {
+      display: grid;
+      gap: 18px;
+    }
+
+    .policy-section {
+      scroll-margin-top: 18px;
+      padding: clamp(22px, 4vw, 34px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-medium);
+      background: var(--surface);
+      box-shadow: 0 16px 44px rgba(0, 0, 0, 0.15);
+    }
+
+    .policy-section h2 {
+      margin: 0 0 17px;
+      color: var(--text);
+      font-size: clamp(1.25rem, 3vw, 1.62rem);
+      line-height: 1.3;
+    }
+
+    .policy-section h3 {
+      margin: 26px 0 10px;
+      color: #dff7ff;
+      font-size: 1.05rem;
+    }
+
+    .policy-section p {
+      margin: 0 0 15px;
+      color: var(--text-secondary);
+    }
+
+    .policy-section p:last-child {
+      margin-bottom: 0;
+    }
+
+    .policy-section ul {
+      margin: 12px 0 18px;
+      padding-inline-start: 24px;
+      color: var(--text-secondary);
+    }
+
+    .policy-section li {
+      margin: 7px 0;
+      padding-inline-start: 4px;
+    }
+
+    .policy-section li::marker {
+      color: var(--primary);
+    }
+
+    .notice {
+      margin-top: 19px;
+      padding: 17px 18px;
+      border-inline-start: 4px solid var(--primary);
+      border-radius: var(--radius-small);
+      background: var(--surface-soft);
+      color: var(--text-secondary);
+    }
+
+    .notice strong {
+      color: var(--text);
+    }
+
+    .contact-card {
+      display: grid;
+      gap: 12px;
+      padding: 20px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-small);
+      background:
+        linear-gradient(
+          135deg,
+          rgba(57, 198, 244, 0.11),
+          rgba(35, 213, 171, 0.06)
+        );
+    }
+
+    .contact-row {
+      display: grid;
+      grid-template-columns: 125px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .contact-label {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .contact-value {
+      color: var(--text);
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+
+    .footer {
+      padding: 32px 14px 0;
+      color: var(--text-muted);
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    .footer strong {
+      color: var(--text-secondary);
+    }
+
+    .language-panel[hidden] {
+      display: none !important;
+    }
+
+    .no-script-message {
+      margin-bottom: 22px;
+      padding: 14px 18px;
+      border: 1px solid rgba(246, 199, 104, 0.42);
+      border-radius: 12px;
+      background: rgba(246, 199, 104, 0.08);
+      color: #ffe2a2;
+    }
+
+    @media (max-width: 850px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .table-of-contents {
+        position: static;
+      }
+
+      .table-of-contents nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page-shell {
+        width: min(calc(100% - 20px), var(--content-width));
+        padding-top: 14px;
+      }
+
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .language-switcher {
+        width: 100%;
+      }
+
+      .language-button {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .hero {
+        padding: 28px 22px;
+        border-radius: 20px;
+      }
+
+      .hero h1 {
+        font-size: 2.15rem;
+      }
+
+      .table-of-contents nav {
+        grid-template-columns: 1fr;
+      }
+
+      .policy-section {
+        padding: 22px 18px;
+      }
+
+      .contact-row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        background: #ffffff;
+        color: #111111;
+      }
+
+      body::before,
+      .topbar,
+      .table-of-contents {
+        display: none;
+      }
+
+      .page-shell {
+        width: 100%;
+        padding: 0;
+      }
+
+      .hero,
+      .policy-section {
+        border: 1px solid #cccccc;
+        background: #ffffff;
+        box-shadow: none;
+      }
+
+      .hero h1,
+      .policy-section h2,
+      .policy-section h3,
+      .policy-section p,
+      .policy-section li,
+      .contact-value,
+      .effective-date strong {
+        color: #111111;
+      }
+
+      .hero-description,
+      .effective-date,
+      .contact-label {
+        color: #444444;
+      }
+
+      .layout {
+        display: block;
+      }
+
+      .policy-section {
+        margin-top: 14px;
+        break-inside: avoid;
+      }
+
+      .language-panel[hidden] {
+        display: block !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  #main-contentSkip to content</a>
+
+  <div class="page-shell">
+    <header class="topbar">
+      ./
+        <span class="brand-mark" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2.8L19 5.7V11.1C19 15.7 16.1 19.5 12 21.2C7.9 19.5 5 15.7 5 11.1V5.7L12 2.8Z"
+              stroke="#6DDBFF"
+              stroke-width="1.7"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M8.6 12.2L10.8 14.4L15.7 9.4"
+              stroke="#35DDB4"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+
+        <span class="brand-text">
+          <span class="brand-name">Afaq VPN</span>
+          <span class="brand-label">Privacy and security</span>
+        </span>
+      </a>
+
+      <div
+        class="language-switcher"
+        role="group"
+        aria-label="Language selection"
+      >
+        <button
+          id="english-button"
+          class="language-button"
+          type="button"
+          data-language="en"
+          aria-pressed="false"
+        >
+          English
+        </button>
+
+        <button
+          id="arabic-button"
+          class="language-button"
+          type="button"
+          data-language="ar"
+          aria-pressed="false"
+        >
+          العربية
+        </button>
+      </div>
+    </header>
+
+    <noscript>
+      <div class="no-script-message">
+        JavaScript is disabled. Both the English and Arabic versions are
+        displayed below.
+      </div>
+    </noscript>
+
+    <main id="main-content">
+      <!-- English Version -->
+      <article
+        id="english-policy"
+        class="language-panel"
+        lang="en"
+        dir="ltr"
+      >
+        <section class="hero">
+          <p class="eyebrow">Privacy and transparency</p>
+
+          <h1>Afaq VPN Privacy Policy</h1>
+
+          <p class="hero-description">
+            This Privacy Policy explains what information Afaq VPN processes,
+            why it is processed, how it is protected, and the choices available
+            to users.
+          </p>
+
+          <p class="effective-date">
+            Effective date:
+            <strong>July 29, 2026</strong>
+          </p>
+        </section>
+
+        <div class="layout">
+          <aside class="table-of-contents" aria-label="Table of contents">
+            <h2>Contents</h2>
+
+            <nav>
+              #en-introduction1. Introduction</a>
+              #en-information2. Information we process</a>
+              #en-traffic3. VPN traffic</a>
+              #en-local4. Local information</a>
+              #en-purposes5. Processing purposes</a>
+              #en-sharing6. Data sharing</a>
+              #en-retention7. Data retention</a>
+              #en-security8. Data security</a>
+              #en-deletion9. Data deletion</a>
+              #en-children10. Children’s privacy</a>
+              #en-international11. International processing</a>
+              #en-third-parties12. Third-party services</a>
+              #en-changes13. Policy changes</a>
+              #en-contact14. Contact</a>
+            </nav>
+          </aside>
+
+          <div class="policy-content">
+            <section id="en-introduction" class="policy-section">
+              <h2>1. Introduction</h2>
+
+              <p>
+                Afaq VPN is operated by Hasan Hussein, based in the United Arab
+                Emirates.
+              </p>
+
+              <p>
+                This Privacy Policy explains what information Afaq VPN
+                processes, why it is processed, how it is protected, and the
+                choices available to users.
+              </p>
+
+              <p>
+                By using Afaq VPN, you acknowledge the practices described in
+                this Privacy Policy.
+              </p>
+            </section>
+
+            <section id="en-information" class="policy-section">
+              <h2>2. Information We Process</h2>
+
+              <p>
+                Afaq VPN does not require users to create an account or provide
+                a name, phone number, or postal address.
+              </p>
+
+              <p>
+                The app and its supporting services may process the following
+                limited information:
+              </p>
+
+              <h3>VPN provisioning and security information</h3>
+
+              <p>
+                To register a device and create a WireGuard VPN configuration,
+                Afaq VPN may process:
+              </p>
+
+              <ul>
+                <li>
+                  A device-generated identifier used by Afaq VPN.
+                </li>
+                <li>
+                  The WireGuard public key generated for the VPN connection.
+                </li>
+                <li>
+                  The IP address from which a registration or security request
+                  is received.
+                </li>
+                <li>
+                  VPN client status, assigned internal VPN address, and
+                  registration status.
+                </li>
+                <li>
+                  Request timestamps and limited security records used to
+                  prevent replay attacks, duplicate registrations, automated
+                  abuse, and unauthorized access.
+                </li>
+              </ul>
+
+              <div class="notice">
+                <strong>Private key protection:</strong>
+                The WireGuard private key should remain on the user’s device
+                and is not intended to be transmitted to Afaq VPN servers.
+              </div>
+
+              <h3>Google Play Integrity</h3>
+
+              <p>
+                Afaq VPN uses Google Play Integrity to help verify that requests
+                originate from a genuine installation of the app running on an
+                eligible Android device.
+              </p>
+
+              <p>
+                Google Play Integrity may process device, application,
+                licensing, and integrity-related signals according to Google’s
+                own privacy practices. Afaq VPN receives and processes the
+                integrity result and related request-validation information
+                for security and fraud-prevention purposes.
+              </p>
+
+              <h3>Advertising information</h3>
+
+              <p>
+                Afaq VPN uses Google AdMob to display advertisements.
+              </p>
+
+              <p>
+                Google AdMob and its advertising partners may collect or
+                process information such as:
+              </p>
+
+              <ul>
+                <li>Advertising identifiers.</li>
+                <li>Device and application information.</li>
+                <li>IP address.</li>
+                <li>General location derived from the IP address.</li>
+                <li>Advertisement interactions and performance information.</li>
+                <li>Diagnostic and fraud-prevention information.</li>
+              </ul>
+
+              <p>
+                The exact information processed by Google AdMob may depend on
+                the user’s device, region, privacy choices, consent status, and
+                the type of advertisements displayed.
+              </p>
+
+              <p>
+                Where required by applicable law, the app will request the
+                user’s consent before serving personalized advertisements.
+                Users who do not consent may receive non-personalized or
+                limited advertisements, where available.
+              </p>
+
+              <p>
+                Google processes advertising information according to its own
+                privacy policies and advertising requirements.
+              </p>
+            </section>
+
+            <section id="en-traffic" class="policy-section">
+              <h2>3. VPN Traffic and Browsing Activity</h2>
+
+              <p>
+                Afaq VPN does not intentionally collect, sell, or store:
+              </p>
+
+              <ul>
+                <li>Browsing history.</li>
+                <li>DNS query history.</li>
+                <li>The content of internet communications.</li>
+                <li>Passwords or messages transmitted through the VPN.</li>
+                <li>
+                  A list of websites or online services visited by the user.
+                </li>
+                <li>The content of encrypted VPN traffic.</li>
+              </ul>
+
+              <p>
+                The selected VPN server necessarily receives encrypted
+                WireGuard tunnel packets and forwards network traffic to
+                provide the VPN service.
+              </p>
+
+              <p>
+                Afaq VPN’s server configuration is not intended to create
+                browsing-history, DNS-history, traffic-content, or destination
+                logs. However, limited technical and security information may
+                be processed temporarily by hosting providers, network
+                infrastructure, operating systems, or security services where
+                necessary to operate and protect the service.
+              </p>
+
+              <p>
+                Afaq VPN does not guarantee anonymity and cannot control
+                information independently collected by websites, internet
+                service providers outside the VPN tunnel, advertising
+                providers, device manufacturers, operating-system providers,
+                or third-party services used by the user.
+              </p>
+            </section>
+
+            <section id="en-local" class="policy-section">
+              <h2>4. Locally Stored Information</h2>
+
+              <p>
+                Some settings may be stored locally on the user’s device,
+                including:
+              </p>
+
+              <ul>
+                <li>Language and appearance preferences.</li>
+                <li>Consent and advertising choices.</li>
+                <li>Connection preferences.</li>
+                <li>VPN configuration and connection status.</li>
+                <li>
+                  Device-generated cryptographic material required for
+                  WireGuard.
+                </li>
+              </ul>
+
+              <p>
+                Locally stored information remains on the device unless it is
+                included in a device backup, removed by the operating system,
+                or deleted when the app’s data is cleared or the app is
+                uninstalled.
+              </p>
+            </section>
+
+            <section id="en-purposes" class="policy-section">
+              <h2>5. Purposes of Processing</h2>
+
+              <p>
+                The limited information described in this policy may be
+                processed to:
+              </p>
+
+              <ul>
+                <li>Establish and maintain the VPN connection.</li>
+                <li>Generate and manage WireGuard client configurations.</li>
+                <li>Verify app and device integrity.</li>
+                <li>
+                  Prevent replay attacks, fraud, unauthorized access, and
+                  automated abuse.
+                </li>
+                <li>Enforce registration and request limits.</li>
+                <li>
+                  Maintain service security, stability, and availability.
+                </li>
+                <li>Display and measure advertisements.</li>
+                <li>Diagnose technical problems.</li>
+                <li>
+                  Comply with legal obligations and valid legal requests.
+                </li>
+              </ul>
+            </section>
+
+            <section id="en-sharing" class="policy-section">
+              <h2>6. Data Sharing</h2>
+
+              <p>
+                Afaq VPN does not sell users’ personal information.
+              </p>
+
+              <p>
+                Limited information may be processed by or shared with service
+                providers when necessary to provide and protect the app,
+                including:
+              </p>
+
+              <ul>
+                <li>
+                  Google Play Integrity, for application and device integrity
+                  verification.
+                </li>
+                <li>
+                  Google AdMob and its advertising partners, for advertising,
+                  measurement, security, and fraud prevention.
+                </li>
+                <li>
+                  VPN server and infrastructure providers, for hosting and
+                  network connectivity.
+                </li>
+                <li>
+                  Authorities or other parties when disclosure is required by
+                  applicable law, a valid legal process, or to protect users,
+                  the service, or the public.
+                </li>
+              </ul>
+
+              <p>
+                These third parties may process information under their own
+                privacy policies and legal obligations.
+              </p>
+            </section>
+
+            <section id="en-retention" class="policy-section">
+              <h2>7. Data Retention</h2>
+
+              <p>
+                Active WireGuard provisioning information, including the public
+                key, assigned internal VPN address, device registration
+                identifier, and client status, may be retained for as long as
+                the device remains registered or the VPN service remains
+                active.
+              </p>
+
+              <p>
+                Security, rate-limiting, request-validation, and anti-abuse
+                records are intended to be retained only for as long as
+                reasonably necessary for security and service protection,
+                normally for up to 90 days, unless a longer period is required
+                to investigate abuse, resolve a technical or legal issue,
+                comply with law, or protect the service.
+              </p>
+
+              <p>
+                Information processed by Google AdMob, Google Play Integrity,
+                hosting providers, or other third parties is retained according
+                to the applicable provider’s policies and settings.
+              </p>
+            </section>
+
+            <section id="en-security" class="policy-section">
+              <h2>8. Data Security</h2>
+
+              <p>
+                Afaq VPN uses reasonable technical and organizational measures
+                designed to protect information, including encrypted network
+                communications, access controls, request verification, request
+                limits, anti-replay protections, and restricted server access.
+              </p>
+
+              <p>
+                WireGuard uses encrypted tunnels to protect traffic between the
+                user’s device and the selected VPN server.
+              </p>
+
+              <p>
+                No system, network, or storage method can be guaranteed to be
+                completely secure. Users are responsible for keeping their
+                devices updated and protected from unauthorized access.
+              </p>
+            </section>
+
+            <section id="en-deletion" class="policy-section">
+              <h2>9. Data Deletion and User Requests</h2>
+
+              <p>
+                Afaq VPN does not require an account. Therefore, there is no
+                in-app user account to delete.
+              </p>
+
+              <p>
+                Users may request deletion of VPN registration and provisioning
+                information associated with their device by contacting:
+              </p>
+
+              <div class="notice">
+                <strong>Email:</strong>
+                <a href="mailto:hassan.syrn@gmail.com">
+                  hassan.syrn@gmail.com
+                </a>
+              </div>
+
+              <p>
+                A deletion request should include enough non-sensitive
+                information to identify the relevant VPN registration. Users
+                should never send a WireGuard private key, password, or other
+                secret credential by email.
+              </p>
+
+              <p>
+                Some information may be retained when reasonably necessary to
+                comply with legal obligations, investigate abuse, protect the
+                service, or resolve security incidents.
+              </p>
+
+              <p>
+                Users can also remove locally stored app information by
+                clearing the app’s storage or uninstalling Afaq VPN. This does
+                not automatically delete information previously received by
+                Afaq VPN servers or third-party service providers.
+              </p>
+            </section>
+
+            <section id="en-children" class="policy-section">
+              <h2>10. Children’s Privacy</h2>
+
+              <p>
+                Afaq VPN is not designed for or directed to children under the
+                age of 13.
+              </p>
+
+              <p>
+                Afaq VPN does not knowingly collect personal information from
+                children under 13. If the developer becomes aware that
+                information has been collected from a child under 13,
+                reasonable steps will be taken to delete it.
+              </p>
+
+              <p>
+                Parents or guardians who believe that a child has provided
+                information through Afaq VPN may contact the developer at the
+                email address below.
+              </p>
+            </section>
+
+            <section id="en-international" class="policy-section">
+              <h2>11. International Processing</h2>
+
+              <p>
+                Afaq VPN is operated from the United Arab Emirates. Information
+                may be processed in the United Arab Emirates or in other
+                countries where VPN infrastructure, Google services,
+                advertising providers, or hosting providers operate.
+              </p>
+
+              <p>
+                These countries may have data-protection laws different from
+                those in the user’s country.
+              </p>
+            </section>
+
+            <section id="en-third-parties" class="policy-section">
+              <h2>12. Third-Party Services</h2>
+
+              <p>
+                Afaq VPN may use third-party services governed by their own
+                terms and privacy policies, including:
+              </p>
+
+              <ul>
+                <li>Google Play Services.</li>
+                <li>Google Play Integrity.</li>
+                <li>Google AdMob.</li>
+                <li>Google advertising and consent services.</li>
+                <li>VPN server and hosting infrastructure providers.</li>
+              </ul>
+
+              <p>
+                Users should review the privacy policies and controls provided
+                by these services.
+              </p>
+            </section>
+
+            <section id="en-changes" class="policy-section">
+              <h2>13. Changes to This Privacy Policy</h2>
+
+              <p>
+                This Privacy Policy may be updated when the app, advertising
+                configuration, VPN infrastructure, legal requirements, or
+                data-processing practices change.
+              </p>
+
+              <p>
+                The updated version will be published at the official Privacy
+                Policy URL with a revised effective date. Material changes may
+                also be communicated within the app where appropriate.
+              </p>
+            </section>
+
+            <section id="en-contact" class="policy-section">
+              <h2>14. Contact</h2>
+
+              <p>
+                For privacy questions, data-deletion requests, or concerns
+                about Afaq VPN, contact:
+              </p>
+
+              <div class="contact-card">
+                <div class="contact-row">
+                  <span class="contact-label">Developer</span>
+                  <span class="contact-value">Hasan Hussein</span>
+                </div>
+
+                <div class="contact-row">
+                  <span class="contact-label">Email</span>
+                  <span class="contact-value">
+                    <a href="mailto:hassan.syrn@gmail.com">
+                      hassan.syrn@gmail.com
+                    </a>
+                  </span>
+                </div>
+
+                <div class="contact-row">
+                  <span class="contact-label">Country</span>
+                  <span class="contact-value">
+                    United Arab Emirates
+                  </span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </article>
+
+      <!-- Arabic Version -->
+      <article
+        id="arabic-policy"
+        class="language-panel"
+        lang="ar"
+        dir="rtl"
+      >
+        <section class="hero">
+          <p class="eyebrow">الخصوصية والشفافية</p>
+
+          <h1>سياسة خصوصية Afaq VPN</h1>
+
+          <p class="hero-description">
+            توضح سياسة الخصوصية هذه المعلومات التي يعالجها تطبيق Afaq VPN،
+            وأسباب معالجتها، وكيفية حمايتها، والخيارات المتاحة للمستخدمين.
+          </p>
+
+          <p class="effective-date">
+            تاريخ السريان:
+            <strong>29 يوليو 2026</strong>
+          </p>
+        </section>
+
+        <div class="layout">
+          <aside class="table-of-contents" aria-label="فهرس المحتويات">
+            <h2>المحتويات</h2>
+
+            <nav>
+              #ar-introduction1. مقدمة</a>
+              #ar-information2. المعلومات التي نعالجها</a>
+              #ar-traffic3. حركة VPN</a>
+              #ar-local4. المعلومات المحلية</a>
+              #ar-purposes5. أغراض المعالجة</a>
+              #ar-sharing6. مشاركة المعلومات</a>
+              #ar-retention7. الاحتفاظ بالبيانات</a>
+              #ar-security8. حماية البيانات</a>
+              #ar-deletion9. حذف البيانات</a>
+              #ar-children10. خصوصية الأطفال</a>
+              #ar-international11. المعالجة الدولية</a>
+              #ar-third-parties12. خدمات خارجية</a>
+              #ar-changes13. تغييرات السياسة</a>
+              #ar-contact14. التواصل</a>
+            </nav>
+          </aside>
+
+          <div class="policy-content">
+            <section id="ar-introduction" class="policy-section">
+              <h2>1. مقدمة</h2>
+
+              <p>
+                يتم تشغيل تطبيق Afaq VPN بواسطة المطور Hasan Hussein من دولة
+                الإمارات العربية المتحدة.
+              </p>
+
+              <p>
+                توضح سياسة الخصوصية هذه المعلومات التي يعالجها تطبيق Afaq VPN،
+                وأسباب معالجتها، وكيفية حمايتها، والخيارات المتاحة للمستخدمين.
+              </p>
+
+              <p>
+                باستخدام تطبيق Afaq VPN، فإنك تقر بالممارسات الموضحة في سياسة
+                الخصوصية هذه.
+              </p>
+            </section>
+
+            <section id="ar-information" class="policy-section">
+              <h2>2. المعلومات التي نعالجها</h2>
+
+              <p>
+                لا يطلب تطبيق Afaq VPN من المستخدم إنشاء حساب أو تقديم الاسم
+                أو رقم الهاتف أو العنوان البريدي.
+              </p>
+
+              <p>
+                قد يعالج التطبيق والخدمات الداعمة له المعلومات المحدودة
+                التالية:
+              </p>
+
+              <h3>معلومات تسجيل VPN والحماية</h3>
+
+              <p>
+                لتسجيل الجهاز وإنشاء إعداد اتصال WireGuard، قد يعالج Afaq VPN
+                ما يلي:
+              </p>
+
+              <ul>
+                <li>
+                  معرّف يتم إنشاؤه للجهاز ويستخدمه تطبيق Afaq VPN.
+                </li>
+                <li>
+                  المفتاح العام لـ WireGuard الذي يتم إنشاؤه لاتصال VPN.
+                </li>
+                <li>
+                  عنوان IP الذي يتم إرسال طلب التسجيل أو الحماية منه.
+                </li>
+                <li>
+                  حالة عميل VPN وعنوان VPN الداخلي المخصص وحالة التسجيل.
+                </li>
+                <li>
+                  أوقات الطلبات وسجلات أمنية محدودة تُستخدم لمنع إعادة استخدام
+                  الطلبات، والتسجيلات المكررة، وإساءة الاستخدام الآلي، والوصول
+                  غير المصرح به.
+                </li>
+              </ul>
+
+              <div class="notice">
+                <strong>حماية المفتاح الخاص:</strong>
+                يجب أن يبقى المفتاح الخاص لـ WireGuard على جهاز المستخدم، وليس
+                من المفترض إرساله إلى خوادم Afaq VPN.
+              </div>
+
+              <h3>Google Play Integrity</h3>
+
+              <p>
+                يستخدم Afaq VPN خدمة Google Play Integrity للمساعدة في التحقق
+                من أن الطلبات صادرة عن نسخة أصلية من التطبيق تعمل على جهاز
+                Android مؤهل.
+              </p>
+
+              <p>
+                قد تعالج Google Play Integrity إشارات مرتبطة بالجهاز والتطبيق
+                والترخيص وسلامة بيئة التشغيل وفقًا لممارسات الخصوصية الخاصة
+                بشركة Google. يستقبل Afaq VPN نتيجة التحقق والمعلومات المرتبطة
+                بالتحقق من الطلب لأغراض الحماية ومنع الاحتيال.
+              </p>
+
+              <h3>معلومات الإعلانات</h3>
+
+              <p>
+                يستخدم Afaq VPN خدمة Google AdMob لعرض الإعلانات.
+              </p>
+
+              <p>
+                قد تجمع Google AdMob وشركاؤها الإعلانيون أو تعالج معلومات مثل:
+              </p>
+
+              <ul>
+                <li>معرّفات الإعلانات.</li>
+                <li>معلومات الجهاز والتطبيق.</li>
+                <li>عنوان IP.</li>
+                <li>الموقع العام المستنتج من عنوان IP.</li>
+                <li>التفاعل مع الإعلانات ومعلومات أدائها.</li>
+                <li>المعلومات التشخيصية ومعلومات منع الاحتيال.</li>
+              </ul>
+
+              <p>
+                قد تختلف المعلومات التي تعالجها Google AdMob حسب جهاز المستخدم
+                والمنطقة وخيارات الخصوصية وحالة الموافقة ونوع الإعلانات
+                المعروضة.
+              </p>
+
+              <p>
+                عندما يكون ذلك مطلوبًا بموجب القوانين المطبقة، سيطلب التطبيق
+                موافقة المستخدم قبل عرض الإعلانات المخصصة. قد يتلقى المستخدم
+                الذي لا يوافق إعلانات غير مخصصة أو محدودة حيثما كان ذلك
+                متاحًا.
+              </p>
+
+              <p>
+                تعالج Google معلومات الإعلانات وفقًا لسياسات الخصوصية ومتطلبات
+                الإعلانات الخاصة بها.
+              </p>
+            </section>
+
+            <section id="ar-traffic" class="policy-section">
+              <h2>3. حركة VPN ونشاط التصفح</h2>
+
+              <p>
+                لا يتعمد Afaq VPN جمع أو بيع أو تخزين:
+              </p>
+
+              <ul>
+                <li>سجل التصفح.</li>
+                <li>سجل استعلامات DNS.</li>
+                <li>محتوى الاتصالات عبر الإنترنت.</li>
+                <li>كلمات المرور أو الرسائل المنقولة عبر VPN.</li>
+                <li>
+                  قائمة المواقع أو الخدمات الإلكترونية التي يزورها المستخدم.
+                </li>
+                <li>محتوى حركة VPN المشفرة.</li>
+              </ul>
+
+              <p>
+                يستقبل خادم VPN المختار بالضرورة حزم نفق WireGuard المشفرة
+                ويعيد توجيه حركة الشبكة لتوفير خدمة VPN.
+              </p>
+
+              <p>
+                لم يتم تصميم إعداد خادم Afaq VPN لإنشاء سجلات لسجل التصفح أو
+                استعلامات DNS أو محتوى حركة الإنترنت أو وجهاتها. ومع ذلك، قد
+                تتم معالجة معلومات تقنية وأمنية محدودة بصورة مؤقتة بواسطة
+                مزودي الاستضافة أو البنية التحتية للشبكة أو أنظمة التشغيل أو
+                خدمات الحماية عندما يكون ذلك ضروريًا لتشغيل الخدمة وحمايتها.
+              </p>
+
+              <p>
+                لا يضمن Afaq VPN إخفاء الهوية، ولا يمكنه التحكم بالمعلومات التي
+                تجمعها بصورة مستقلة المواقع الإلكترونية أو مزودو الإنترنت
+                خارج نفق VPN أو مزودو الإعلانات أو مصنعو الأجهزة أو مزودو
+                أنظمة التشغيل أو خدمات الجهات الخارجية التي يستخدمها
+                المستخدم.
+              </p>
+            </section>
+
+            <section id="ar-local" class="policy-section">
+              <h2>4. المعلومات المخزنة محليًا</h2>
+
+              <p>
+                قد يتم تخزين بعض الإعدادات محليًا على جهاز المستخدم، ومنها:
+              </p>
+
+              <ul>
+                <li>تفضيلات اللغة والمظهر.</li>
+                <li>خيارات الموافقة والإعلانات.</li>
+                <li>تفضيلات الاتصال.</li>
+                <li>إعداد VPN وحالة الاتصال.</li>
+                <li>
+                  المواد التشفيرية التي يتم إنشاؤها على الجهاز والضرورية لعمل
+                  WireGuard.
+                </li>
+              </ul>
+
+              <p>
+                تبقى المعلومات المحلية على الجهاز ما لم يتم تضمينها في نسخة
+                احتياطية للجهاز أو حذفها بواسطة نظام التشغيل أو عند مسح بيانات
+                التطبيق أو إلغاء تثبيته.
+              </p>
+            </section>
+
+            <section id="ar-purposes" class="policy-section">
+              <h2>5. أغراض معالجة المعلومات</h2>
+
+              <p>
+                قد تتم معالجة المعلومات المحدودة المبينة في هذه السياسة من
+                أجل:
+              </p>
+
+              <ul>
+                <li>إنشاء اتصال VPN والمحافظة عليه.</li>
+                <li>إنشاء إعدادات عملاء WireGuard وإدارتها.</li>
+                <li>التحقق من سلامة التطبيق والجهاز.</li>
+                <li>
+                  منع إعادة استخدام الطلبات والاحتيال والوصول غير المصرح
+                  وإساءة الاستخدام الآلي.
+                </li>
+                <li>تطبيق حدود التسجيل وعدد الطلبات.</li>
+                <li>المحافظة على أمان الخدمة واستقرارها وتوفرها.</li>
+                <li>عرض الإعلانات وقياس أدائها.</li>
+                <li>تشخيص المشكلات التقنية.</li>
+                <li>
+                  الامتثال للالتزامات القانونية والطلبات القانونية الصحيحة.
+                </li>
+              </ul>
+            </section>
+
+            <section id="ar-sharing" class="policy-section">
+              <h2>6. مشاركة المعلومات</h2>
+
+              <p>
+                لا يبيع Afaq VPN المعلومات الشخصية للمستخدمين.
+              </p>
+
+              <p>
+                قد تتم معالجة معلومات محدودة بواسطة مزودي الخدمات أو مشاركتها
+                معهم عندما يكون ذلك ضروريًا لتشغيل التطبيق وحمايته، ومنهم:
+              </p>
+
+              <ul>
+                <li>
+                  Google Play Integrity للتحقق من سلامة التطبيق والجهاز.
+                </li>
+                <li>
+                  Google AdMob وشركاؤها الإعلانيون لأغراض الإعلان والقياس
+                  والحماية ومنع الاحتيال.
+                </li>
+                <li>
+                  مزودو خوادم VPN والبنية التحتية لأغراض الاستضافة والاتصال
+                  بالشبكة.
+                </li>
+                <li>
+                  السلطات أو الجهات الأخرى عندما يكون الإفصاح مطلوبًا بموجب
+                  القانون أو إجراء قانوني صحيح أو لحماية المستخدمين أو الخدمة
+                  أو الجمهور.
+                </li>
+              </ul>
+
+              <p>
+                قد تعالج هذه الجهات المعلومات وفقًا لسياسات الخصوصية
+                والالتزامات القانونية الخاصة بها.
+              </p>
+            </section>
+
+            <section id="ar-retention" class="policy-section">
+              <h2>7. مدة الاحتفاظ بالبيانات</h2>
+
+              <p>
+                قد يتم الاحتفاظ بمعلومات تسجيل WireGuard النشطة، بما فيها
+                المفتاح العام وعنوان VPN الداخلي المخصص ومعرّف تسجيل الجهاز
+                وحالة العميل، ما دام الجهاز مسجلًا أو خدمة VPN مفعلة.
+              </p>
+
+              <p>
+                يُقصد الاحتفاظ بسجلات الحماية وتحديد عدد الطلبات والتحقق من
+                الطلبات ومنع إساءة الاستخدام فقط للمدة الضرورية بصورة معقولة
+                لحماية الخدمة، وعادة لمدة لا تتجاوز 90 يومًا، إلا إذا كانت
+                هناك ضرورة للاحتفاظ بها مدة أطول للتحقيق في إساءة استخدام، أو
+                معالجة مشكلة تقنية أو قانونية، أو الامتثال للقانون، أو حماية
+                الخدمة.
+              </p>
+
+              <p>
+                تحتفظ Google AdMob وGoogle Play Integrity ومزودو الاستضافة
+                والجهات الخارجية الأخرى بالمعلومات وفقًا لسياسات وإعدادات كل
+                مزود.
+              </p>
+            </section>
+
+            <section id="ar-security" class="policy-section">
+              <h2>8. حماية البيانات</h2>
+
+              <p>
+                يستخدم Afaq VPN إجراءات تقنية وتنظيمية معقولة مصممة لحماية
+                المعلومات، ومنها اتصالات الشبكة المشفرة، وضوابط الوصول،
+                والتحقق من الطلبات، وتحديد عدد الطلبات، والحماية من إعادة
+                استخدام الطلبات، وتقييد الوصول إلى الخادم.
+              </p>
+
+              <p>
+                يستخدم WireGuard أنفاقًا مشفرة لحماية حركة الاتصال بين جهاز
+                المستخدم وخادم VPN المختار.
+              </p>
+
+              <p>
+                لا يمكن ضمان الأمان الكامل لأي نظام أو شبكة أو وسيلة تخزين.
+                يتحمل المستخدم مسؤولية تحديث جهازه وحمايته من الوصول غير
+                المصرح به.
+              </p>
+            </section>
+
+            <section id="ar-deletion" class="policy-section">
+              <h2>9. حذف البيانات وطلبات المستخدم</h2>
+
+              <p>
+                لا يتطلب Afaq VPN إنشاء حساب، ولذلك لا يوجد حساب مستخدم داخل
+                التطبيق يمكن حذفه.
+              </p>
+
+              <p>
+                يمكن للمستخدم طلب حذف معلومات تسجيل VPN وإعداداته المرتبطة
+                بجهازه من خلال التواصل عبر:
+              </p>
+
+              <div class="notice">
+                <strong>البريد الإلكتروني:</strong>
+                <a href="mailto:hassan.syrn@gmail.com">
+                  hassan.syrn@gmail.com
+                </a>
+              </div>
+
+              <p>
+                يجب أن يتضمن طلب الحذف معلومات غير حساسة وكافية لتحديد تسجيل
+                VPN المطلوب. يجب ألا يرسل المستخدم المفتاح الخاص لـ WireGuard
+                أو كلمة مرور أو أي بيانات سرية عبر البريد الإلكتروني.
+              </p>
+
+              <p>
+                قد يتم الاحتفاظ ببعض المعلومات عندما يكون ذلك ضروريًا بصورة
+                معقولة للامتثال للالتزامات القانونية، أو التحقيق في إساءة
+                الاستخدام، أو حماية الخدمة، أو معالجة الحوادث الأمنية.
+              </p>
+
+              <p>
+                يمكن للمستخدم حذف المعلومات المخزنة محليًا من خلال مسح بيانات
+                التطبيق أو إلغاء تثبيت Afaq VPN. لا يؤدي ذلك تلقائيًا إلى حذف
+                المعلومات التي سبق أن استلمتها خوادم Afaq VPN أو مزودو الخدمات
+                الخارجيون.
+              </p>
+            </section>
+
+            <section id="ar-children" class="policy-section">
+              <h2>10. خصوصية الأطفال</h2>
+
+              <p>
+                تطبيق Afaq VPN غير مصمم أو موجّه للأطفال الذين تقل أعمارهم عن
+                13 عامًا.
+              </p>
+
+              <p>
+                لا يجمع Afaq VPN عن قصد معلومات شخصية من الأطفال دون سن 13
+                عامًا. إذا علم المطور بجمع معلومات من طفل يقل عمره عن 13
+                عامًا، فسيتم اتخاذ خطوات معقولة لحذفها.
+              </p>
+
+              <p>
+                يمكن للوالدين أو الأوصياء الذين يعتقدون أن طفلًا قد قدم
+                معلومات من خلال Afaq VPN التواصل مع المطور عبر البريد
+                الإلكتروني الموضح أدناه.
+              </p>
+            </section>
+
+            <section id="ar-international" class="policy-section">
+              <h2>11. معالجة المعلومات دوليًا</h2>
+
+              <p>
+                يتم تشغيل Afaq VPN من دولة الإمارات العربية المتحدة. قد تتم
+                معالجة المعلومات في دولة الإمارات أو في دول أخرى يعمل فيها
+                مزودو خوادم VPN أو خدمات Google أو مزودو الإعلانات أو مزودو
+                الاستضافة.
+              </p>
+
+              <p>
+                قد تكون قوانين حماية البيانات في هذه الدول مختلفة عن القوانين
+                المطبقة في دولة المستخدم.
+              </p>
+            </section>
+
+            <section id="ar-third-parties" class="policy-section">
+              <h2>12. خدمات الجهات الخارجية</h2>
+
+              <p>
+                قد يستخدم Afaq VPN خدمات خارجية تخضع لشروط وسياسات الخصوصية
+                الخاصة بها، ومنها:
+              </p>
+
+              <ul>
+                <li>Google Play Services.</li>
+                <li>Google Play Integrity.</li>
+                <li>Google AdMob.</li>
+                <li>خدمات Google للإعلانات وإدارة الموافقة.</li>
+                <li>مزودو خوادم VPN والبنية التحتية للاستضافة.</li>
+              </ul>
+
+              <p>
+                ينبغي للمستخدم مراجعة سياسات الخصوصية وخيارات التحكم التي
+                توفرها هذه الخدمات.
+              </p>
+            </section>
+
+            <section id="ar-changes" class="policy-section">
+              <h2>13. التغييرات على سياسة الخصوصية</h2>
+
+              <p>
+                قد يتم تحديث سياسة الخصوصية عند تغيير التطبيق أو إعدادات
+                الإعلانات أو بنية VPN أو المتطلبات القانونية أو ممارسات
+                معالجة المعلومات.
+              </p>
+
+              <p>
+                سيتم نشر النسخة المحدثة على الرابط الرسمي لسياسة الخصوصية مع
+                تعديل تاريخ السريان. وقد يتم إبلاغ المستخدم بالتغييرات المهمة
+                داخل التطبيق عندما يكون ذلك مناسبًا.
+              </p>
+            </section>
+
+            <section id="ar-contact" class="policy-section">
+              <h2>14. التواصل</h2>
+
+              <p>
+                للاستفسارات المتعلقة بالخصوصية أو طلبات حذف البيانات أو
+                المخاوف المتعلقة بتطبيق Afaq VPN، يرجى التواصل عبر:
+              </p>
+
+              <div class="contact-card">
+                <div class="contact-row">
+                  <span class="contact-label">المطور</span>
+                  <span class="contact-value">Hasan Hussein</span>
+                </div>
+
+                <div class="contact-row">
+                  <span class="contact-label">البريد الإلكتروني</span>
+                 
